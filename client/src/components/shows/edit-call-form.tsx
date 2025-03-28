@@ -91,109 +91,121 @@ export function EditCallForm({
   };
   
   return (
-    <div className="bg-white p-4 border-t border-b border-gray-200">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Cast Call" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Description (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Additional details" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="minutesBefore"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Minutes Before Show</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    min={1} 
-                    max={180} 
-                    placeholder="30" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="groupIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">Groups</FormLabel>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {groups.map(group => {
-                    const isSelected = field.value?.includes(group.id);
-                    return (
-                      <Badge
-                        key={group.id}
-                        variant={isSelected ? "default" : "outline"}
-                        className={`cursor-pointer ${isSelected ? "bg-primary" : ""}`}
-                        onClick={() => toggleGroup(group.id)}
-                      >
-                        {group.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm"
-              onClick={onCancel}
-              disabled={updateCall.isPending}
-            >
-              <XIcon className="h-4 w-4 mr-1" />
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              size="sm"
-              disabled={updateCall.isPending}
-            >
-              {updateCall.isPending ? "Saving..." : (
-                <>
-                  <SaveIcon className="h-4 w-4 mr-1" />
-                  Update Call
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+    <div className="p-4 bg-gray-50 border-b border-gray-200">
+      <div className="flex items-start">
+        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white font-medium mr-3 mt-1">
+          <SaveIcon className="h-4 w-4" />
+        </div>
+        <div className="flex-grow">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Cast Call" {...field} className="h-9" />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="minutesBefore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-medium">Minutes Before Show</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min={1} 
+                          max={180} 
+                          placeholder="30" 
+                          {...field} 
+                          className="h-9"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium">Description (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Additional details" {...field} className="h-9" />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="groupIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium">Groups</FormLabel>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {groups.map(group => {
+                        const isSelected = field.value?.includes(group.id);
+                        return (
+                          <Badge
+                            key={group.id}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer text-xs px-2 py-0.5 ${isSelected ? "bg-primary" : ""}`}
+                            onClick={() => toggleGroup(group.id)}
+                          >
+                            {group.name}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end space-x-2 pt-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={onCancel}
+                  disabled={updateCall.isPending}
+                  className="h-8 text-xs"
+                >
+                  <XIcon className="h-3 w-3 mr-1" />
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  size="sm"
+                  disabled={updateCall.isPending}
+                  className="h-8 text-xs"
+                >
+                  {updateCall.isPending ? "Saving..." : (
+                    <>
+                      <SaveIcon className="h-3 w-3 mr-1" />
+                      Save
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }

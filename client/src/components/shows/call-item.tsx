@@ -9,7 +9,6 @@ import { apiRequest } from "@/lib/queryClient";
 
 export function CallItem({ call, number }: CallItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [actionsVisible, setActionsVisible] = useState(false);
   const queryClient = useQueryClient();
   
   // Delete call mutation
@@ -33,14 +32,8 @@ export function CallItem({ call, number }: CallItemProps) {
     });
   };
   
-  const toggleActions = () => {
-    setActionsVisible(!actionsVisible);
-  };
-  
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditing(true);
-    setActionsVisible(false);
+  const toggleEdit = () => {
+    setIsEditing(!isEditing);
   };
   
   const handleDelete = (e: React.MouseEvent) => {
@@ -48,7 +41,6 @@ export function CallItem({ call, number }: CallItemProps) {
     if (window.confirm(`Are you sure you want to delete "${call.title || 'Untitled Call'}"?`)) {
       deleteMutation.mutate();
     }
-    setActionsVisible(false);
   };
   
   const handleEditComplete = () => {
@@ -60,7 +52,7 @@ export function CallItem({ call, number }: CallItemProps) {
   };
 
   return (
-    <>
+    <div className="border-b border-gray-200 last:border-b-0">
       {isEditing ? (
         <EditCallForm
           call={call}
@@ -69,8 +61,8 @@ export function CallItem({ call, number }: CallItemProps) {
         />
       ) : (
         <div 
-          className="flex items-center py-3 px-3 border-b border-gray-200 last:border-b-0 group cursor-pointer relative"
-          onClick={toggleActions}
+          className="flex items-center py-3 px-3 cursor-pointer relative hover:bg-gray-50 transition-colors"
+          onClick={toggleEdit}
         >
           <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white font-medium mr-3">
             {number.toString().padStart(2, "0")}
@@ -98,54 +90,18 @@ export function CallItem({ call, number }: CallItemProps) {
           </div>
           
           <div className="flex items-center">
-            {/* Show actions menu only when actionsVisible is true */}
-            {actionsVisible && (
-              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 flex items-center bg-white shadow-md rounded-md p-1 z-10">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-blue-600 hover:bg-blue-50"
-                  onClick={handleEdit}
-                  title="Edit call"
-                >
-                  <Edit2Icon className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-red-600 hover:bg-red-50 ml-1"
-                  onClick={handleDelete}
-                  title="Delete call"
-                >
-                  <Trash2Icon className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-gray-600 hover:bg-gray-50 ml-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActionsVisible(false);
-                  }}
-                  title="Close"
-                >
-                  <XCircleIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
-            {/* Always show the more actions button on hover */}
-            <div className="mr-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex space-x-1 mr-3">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-7 w-7 text-gray-500 hover:text-primary"
+                className="h-7 w-7 text-red-500 hover:bg-red-50 opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleActions();
+                  handleDelete(e);
                 }}
+                title="Delete call"
               >
-                <MoreVerticalIcon className="h-4 w-4" />
+                <Trash2Icon className="h-4 w-4" />
               </Button>
             </div>
             
@@ -165,6 +121,6 @@ export function CallItem({ call, number }: CallItemProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
