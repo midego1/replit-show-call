@@ -136,20 +136,26 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
             </div>
             
             <DialogFooter className="pt-4 border-t">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={() => onOpenChange(false)}
-                disabled={createShow.isPending}
+              <div 
+                className="touch-manipulation"
+                onClick={() => !createShow.isPending && onOpenChange(false)}
               >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createShow.isPending}
-              >
-                {createShow.isPending ? "Creating..." : "Create Show"}
-              </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  disabled={createShow.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+              <div className="touch-manipulation">
+                <Button 
+                  type="submit" 
+                  disabled={createShow.isPending}
+                >
+                  {createShow.isPending ? "Creating..." : "Create Show"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

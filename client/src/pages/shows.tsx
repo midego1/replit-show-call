@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Show } from "@shared/schema";
 import { ShowWithDetails } from "@/lib/types";
@@ -14,6 +14,7 @@ import { FloatingActionButton } from "@/components/floating-action-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Shows() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -23,6 +24,18 @@ export default function Shows() {
   const [showAddForm, setShowAddForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  
+  // Helper function to handle adding a show with device-appropriate UI
+  const handleAddShow = useCallback(() => {
+    if (isMobile) {
+      // Use modal dialog on mobile devices for better touch experience
+      setShowCreateDialog(true);
+    } else {
+      // Use inline form on desktop
+      setShowAddForm(true);
+    }
+  }, [isMobile]);
   
   // Fetch shows
   const { data: shows = [] } = useQuery<Show[]>({
@@ -178,7 +191,7 @@ export default function Shows() {
           <h3 className="text-lg font-medium mb-2">No shows yet</h3>
           <p className="text-gray-500 mb-4">Create your first show to get started</p>
           <Button
-            onClick={() => setShowAddForm(true)}
+            onClick={handleAddShow}
             className="rounded-full px-6"
           >
             Create Show
@@ -200,7 +213,7 @@ export default function Shows() {
           {!showAddForm && (
             <div 
               className="w-full mb-2 cursor-pointer touch-manipulation"
-              onClick={() => setShowAddForm(true)}
+              onClick={handleAddShow}
             >
               <Button
                 type="button"
@@ -218,7 +231,7 @@ export default function Shows() {
       )}
       
       <FloatingActionButton 
-        onClick={() => setShowAddForm(true)}
+        onClick={handleAddShow}
       />
       
       <CreateShowDialog
