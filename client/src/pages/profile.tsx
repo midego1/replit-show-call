@@ -12,9 +12,11 @@ import {
   Loader2
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 
 export default function Profile() {
   const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
   
   // Get initials from username for the avatar
   const getInitials = (username: string) => {
@@ -23,6 +25,10 @@ export default function Profile() {
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+  
+  const navigateTo = (path: string) => {
+    setLocation(path);
   };
 
   return (
@@ -56,6 +62,7 @@ export default function Profile() {
               <Button 
                 variant="ghost" 
                 className="w-full flex items-center justify-between px-4 py-3 text-gray-900 hover:bg-gray-50"
+                onClick={() => navigateTo("/notification-settings")}
               >
                 <div className="flex items-center">
                   <BellIcon className="mr-3 h-5 w-5 text-gray-500" />

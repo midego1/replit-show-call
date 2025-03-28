@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Shows from "@/pages/shows";
 import Profile from "@/pages/profile";
+import NotificationSettings from "@/pages/notification-settings";
 import AuthPage from "@/pages/auth-page";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { NotificationPermissionDialog } from "@/components/notification-permission-dialog";
@@ -94,6 +95,14 @@ function Router() {
         return (
           <AuthenticatedLayout>
             <Profile />
+          </AuthenticatedLayout>
+        );
+      }} />
+      
+      <ProtectedRoute path="/notification-settings" component={() => {
+        return (
+          <AuthenticatedLayout>
+            <NotificationSettings />
           </AuthenticatedLayout>
         );
       }} />
