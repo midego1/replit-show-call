@@ -203,11 +203,21 @@ export default function Shows() {
         </div>
       )}
       
-      <FloatingActionButton onClick={() => setShowAddForm(true)} />
+      <FloatingActionButton 
+        onClick={() => setShowAddForm(true)}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          setShowAddForm(true);
+        }}
+      />
       
       <CreateShowDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          setShowCreateDialog(true);
+        }}
       />
       
       <EditShowDialog
