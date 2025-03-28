@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Group } from "@shared/schema";
-import { XIcon, SaveIcon, UsersIcon, BellIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { XIcon, SaveIcon, BellIcon } from "lucide-react";
 
 // Extend the insertCallSchema with client-side validation
 const createCallSchema = z.object({
@@ -20,8 +18,8 @@ const createCallSchema = z.object({
     .number()
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
-  // Array of groupIds
-  groupIds: z.array(z.number()).min(1, "Please select at least one group"),
+  // Empty array for groupIds - groups functionality has been removed
+  groupIds: z.array(z.number()).default([]),
   showId: z.coerce.number(),
   sendNotification: z.boolean().default(false)
 });
@@ -40,23 +38,14 @@ export function InlineCallForm({
   onCancel
 }: InlineCallFormProps) {
   const queryClient = useQueryClient();
-  
-  // Only show show-specific groups
-  const { data: showGroups = [] } = useQuery<Group[]>({
-    queryKey: showId ? ["/api/shows", showId, "groups"] : [],
-    enabled: !!showId
-  });
-  
-  // Only use show-specific groups
-  const groups = [...showGroups];
-  
+
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),
     defaultValues: {
       title: "",
       description: "",
       minutesBefore: 30,
-      groupIds: groups.length > 0 ? [groups[0].id] : [],
+      groupIds: [], // Empty array as groups functionality has been removed
       showId: showId,
       sendNotification: false
     }
@@ -133,51 +122,6 @@ export function InlineCallForm({
               )}
             />
           </div>
-          
-          <FormField
-            control={form.control}
-            name="groupIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center text-sm font-medium">
-                  <UsersIcon className="h-4 w-4 mr-1" /> 
-                  Assign to Groups (select multiple)
-                </FormLabel>
-                <FormControl>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {groups.length > 0 ? (
-                      groups.map((group) => {
-                        const isSelected = field.value.includes(group.id);
-                        return (
-                          <Badge 
-                            key={group.id}
-                            variant={isSelected ? "default" : "outline"}
-                            className={`cursor-pointer ${isSelected ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
-                            onClick={() => {
-                              if (isSelected) {
-                                // Remove group if already selected
-                                field.onChange(field.value.filter(id => id !== group.id));
-                              } else {
-                                // Add group if not selected
-                                field.onChange([...field.value, group.id]);
-                              }
-                            }}
-                          >
-                            {group.name}
-                          </Badge>
-                        );
-                      })
-                    ) : (
-                      <div className="text-sm text-gray-500 py-1">
-                        No groups available. Please add show-specific groups in the Groups tab first.
-                      </div>
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           
           <FormField
             control={form.control}

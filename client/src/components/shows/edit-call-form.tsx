@@ -20,7 +20,7 @@ const editCallSchema = z.object({
     .number()
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
-  groupIds: z.array(z.number()).default([]),
+  groupIds: z.array(z.number()).default([]), // Empty array as groups functionality has been removed
   showId: z.coerce.number(),
   sendNotification: z.boolean().default(false)
 });
