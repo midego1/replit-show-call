@@ -39,18 +39,30 @@ export function ShowCard({
     setShowInlineForm(false);
   };
   
+  // Add a handler to toggle the card expansion
+  const handleExpandToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onToggleExpand(show.id);
+  };
+
   return (
-    <Card className="overflow-hidden shadow-sm">
+    <Card className="overflow-hidden shadow-sm transition-all duration-200">
       <CardHeader 
         className="px-5 py-4 flex flex-col cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={() => onToggleExpand(show.id)}
+        onClick={handleExpandToggle}
       >
         <div className="flex justify-between items-start">
           <div>
             <h3 className="text-lg font-medium">{show.name}</h3>
             <p className="text-sm text-gray-500">{show.description}</p>
           </div>
-          <div>
+          <div 
+            className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent double toggling
+              onToggleExpand(show.id);
+            }}
+          >
             {expanded ? 
               <ChevronUpIcon className="h-5 w-5 text-gray-500" /> : 
               <ChevronDownIcon className="h-5 w-5 text-gray-500" />
