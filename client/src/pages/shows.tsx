@@ -172,7 +172,6 @@ export default function Shows() {
   
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
-      <h2 className="text-xl font-medium mb-6">My Shows</h2>
       
       {processedShows.length === 0 ? (
         <div className="text-center py-12">
