@@ -32,3 +32,10 @@ export type CallItemProps = {
 };
 
 export type TabOption = "home" | "shows" | "groups" | "profile";
+
+// Global window property for iOS click handling
+declare global {
+  interface Window {
+    _clickProcessing?: boolean;
+  }
+}

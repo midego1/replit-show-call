@@ -26,11 +26,23 @@ export default function Shows() {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   
-  // Helper function to handle adding a show - now always uses inline form
+  // State to track button clicks to prevent double-taps
+  const [isButtonProcessing, setIsButtonProcessing] = useState(false);
+  
+  // Helper function to handle adding a show with iOS double-tap prevention
   const handleAddShow = useCallback(() => {
-    // Always use inline form per user preference
-    setShowAddForm(true);
-  }, []);
+    // Prevent double clicks with state tracking
+    if (isButtonProcessing) return;
+    
+    setIsButtonProcessing(true);
+    
+    // Set timeout to prevent double-taps on iOS
+    setTimeout(() => {
+      // Always use inline form per user preference
+      setShowAddForm(true);
+      setIsButtonProcessing(false);
+    }, 100);
+  }, [isButtonProcessing]);
   
   // Fetch shows
   const { data: shows = [] } = useQuery<Show[]>({
@@ -185,12 +197,30 @@ export default function Shows() {
         <div className="text-center py-12">
           <h3 className="text-lg font-medium mb-2">No shows yet</h3>
           <p className="text-gray-500 mb-4">Create your first show to get started</p>
-          <Button
+          <button
             onClick={handleAddShow}
-            className="rounded-full px-6"
+            disabled={isButtonProcessing}
+            type="button"
+            style={{
+              backgroundColor: isButtonProcessing ? 'var(--primary-light)' : 'var(--primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '10px 24px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: isButtonProcessing ? 'not-allowed' : 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
+              minHeight: '44px',
+              width: '160px',
+              transition: 'background-color 0.2s'
+            }}
           >
-            Create Show
-          </Button>
+            {isButtonProcessing ? 'Processing...' : 'Create Show'}
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -206,21 +236,25 @@ export default function Shows() {
           )}
           
           {!showAddForm && (
-            <div 
-              className="w-full mb-2 cursor-pointer touch-manipulation"
+            <button 
+              className="w-full mb-4 py-3 border border-dashed border-gray-300 rounded-md flex items-center justify-center bg-white hover:bg-gray-50 text-gray-500"
+              style={{
+                cursor: isButtonProcessing ? 'not-allowed' : 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                minHeight: '50px',
+                opacity: isButtonProcessing ? 0.7 : 1,
+                transition: 'opacity 0.2s'
+              }}
               onClick={handleAddShow}
+              disabled={isButtonProcessing}
+              type="button"
             >
-              <div className="touch-manipulation w-full h-full">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full py-4 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary active:bg-primary/5"
-                >
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  Add New Show
-                </Button>
-              </div>
-            </div>
+              <PlusIcon className="h-5 w-5 mr-2" />
+              <span>Add New Show</span>
+            </button>
           )}
           
           {processedShows.map(renderShowCard)}
