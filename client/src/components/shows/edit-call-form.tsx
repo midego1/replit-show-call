@@ -232,10 +232,10 @@ export function EditCallForm({
                   size="sm"
                   onClick={() => deleteCall.mutate()}
                   disabled={deleteCall.isPending || updateCall.isPending}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  title="Delete"
+                  className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
-                  <Trash2Icon className="h-4 w-4" />
+                  <Trash2Icon className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
                 
                 <Button 

@@ -64,10 +64,7 @@ export class MemStorage implements IStorage {
   private createDefaultGroups() {
     const defaultGroups = [
       { name: "All", isCustom: 0, showId: null },
-      { name: "Cast", isCustom: 0, showId: null },
-      { name: "Crew", isCustom: 0, showId: null },
-      { name: "Staff", isCustom: 0, showId: null },
-      { name: "Guests", isCustom: 0, showId: null }
+      { name: "Crew", isCustom: 0, showId: null }
     ];
     
     defaultGroups.forEach(group => {
@@ -115,8 +112,7 @@ export class MemStorage implements IStorage {
     };
     this.shows.set(id, show);
     
-    // Add default "Cast" and "Crew" groups for the show
-    await this.createGroup({ name: "Cast", isCustom: 1, showId: id });
+    // Add default "Crew" group for the show
     await this.createGroup({ name: "Crew", isCustom: 1, showId: id });
     
     return show;
@@ -260,7 +256,8 @@ export class MemStorage implements IStorage {
       description: processedCall.description,
       minutesBefore: processedCall.minutesBefore,
       groupIds: processedCall.groupIds,
-      showId: processedCall.showId
+      showId: processedCall.showId,
+      sendNotification: processedCall.sendNotification || 0
     };
     
     this.calls.set(id, call);
@@ -285,7 +282,12 @@ export class MemStorage implements IStorage {
       showId: updates.showId !== undefined ? updates.showId : call.showId,
       
       // groupIds is already transformed by the schema if it's an array
-      groupIds: updates.groupIds !== undefined ? updates.groupIds : call.groupIds
+      groupIds: updates.groupIds !== undefined ? updates.groupIds : call.groupIds,
+      
+      // Handle sendNotification
+      sendNotification: updates.sendNotification !== undefined 
+        ? (updates.sendNotification ? 1 : 0) 
+        : call.sendNotification
     };
 
     const updatedCall: Call = {
@@ -294,7 +296,8 @@ export class MemStorage implements IStorage {
       description: processedUpdates.description,
       minutesBefore: processedUpdates.minutesBefore,
       groupIds: processedUpdates.groupIds,
-      showId: processedUpdates.showId
+      showId: processedUpdates.showId,
+      sendNotification: processedUpdates.sendNotification
     };
     
     this.calls.set(id, updatedCall);
@@ -356,10 +359,7 @@ export class DatabaseStorage implements IStorage {
       // Create default groups
       const defaultGroups = [
         { name: "All", isCustom: 0, showId: null },
-        { name: "Cast", isCustom: 0, showId: null },
-        { name: "Crew", isCustom: 0, showId: null },
-        { name: "Staff", isCustom: 0, showId: null },
-        { name: "Guests", isCustom: 0, showId: null }
+        { name: "Crew", isCustom: 0, showId: null }
       ];
       
       for (const group of defaultGroups) {
@@ -400,8 +400,7 @@ export class DatabaseStorage implements IStorage {
       // Insert the show
       const [show] = await tx.insert(shows).values(insertShow).returning();
       
-      // Add default show-specific groups
-      await tx.insert(groups).values({ name: "Cast", isCustom: 1, showId: show.id });
+      // Add default show-specific group
       await tx.insert(groups).values({ name: "Crew", isCustom: 1, showId: show.id });
       
       return show;
