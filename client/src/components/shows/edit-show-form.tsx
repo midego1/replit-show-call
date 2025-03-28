@@ -1,52 +1,57 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Show } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { XIcon, SaveIcon } from "lucide-react";
+import { XIcon, SaveIcon, Trash2Icon } from "lucide-react";
 
-// Create show schema
-const createShowSchema = z.object({
+// Schema for editing a show
+const editShowSchema = z.object({
   name: z.string().min(1, "Show name is required"),
   description: z.string().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format"),
 });
 
-type CreateShowFormValues = z.infer<typeof createShowSchema>;
+type EditShowFormValues = z.infer<typeof editShowSchema>;
 
-interface InlineShowFormProps {
+interface EditShowFormProps {
+  show: Show;
   onComplete: () => void;
   onCancel: () => void;
+  onDelete?: (id: number) => void;
 }
 
-export function InlineShowForm({
+export function EditShowForm({
+  show,
   onComplete,
   onCancel,
-}: InlineShowFormProps) {
+  onDelete
+}: EditShowFormProps) {
   const queryClient = useQueryClient();
   
-  // Get current date and time for default values
-  const today = new Date();
-  const formattedDate = today.toISOString().split('T')[0];
-  const formattedTime = '19:00'; // Default to 7 PM
+  // Parse the show date and time for form values
+  const showDate = new Date(show.startTime);
+  const formattedDate = showDate.toISOString().split('T')[0];
+  const formattedTime = showDate.toTimeString().substring(0, 5);
   
-  const form = useForm<CreateShowFormValues>({
-    resolver: zodResolver(createShowSchema),
+  const form = useForm<EditShowFormValues>({
+    resolver: zodResolver(editShowSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: show.name,
+      description: show.description || "",
       date: formattedDate,
       time: formattedTime,
     }
   });
   
-  const createShow = useMutation({
-    mutationFn: async (values: CreateShowFormValues) => {
+  const updateShow = useMutation({
+    mutationFn: async (values: EditShowFormValues) => {
       const startTime = new Date(`${values.date}T${values.time}`);
       
       const data = {
@@ -55,7 +60,7 @@ export function InlineShowForm({
         startTime: startTime.toISOString(),
       };
       
-      const response = await apiRequest("POST", "/api/shows", data);
+      const response = await apiRequest("PUT", `/api/shows/${show.id}`, data);
       return response.json();
     },
     onSuccess: () => {
@@ -65,14 +70,20 @@ export function InlineShowForm({
     }
   });
   
-  const onSubmit = (values: CreateShowFormValues) => {
-    createShow.mutate(values);
+  const onSubmit = (values: EditShowFormValues) => {
+    updateShow.mutate(values);
+  };
+  
+  const handleDelete = () => {
+    if (onDelete && window.confirm(`Are you sure you want to delete "${show.name}"?`)) {
+      onDelete(show.id);
+    }
   };
   
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200">
+    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 p-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="name"
@@ -135,31 +146,45 @@ export function InlineShowForm({
             />
           </div>
           
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-between pt-2">
             <Button 
               type="button" 
-              variant="outline" 
+              variant="ghost" 
               size="sm"
-              onClick={onCancel}
-              disabled={createShow.isPending}
-              className="h-8 text-xs"
+              onClick={handleDelete}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 text-xs"
+              disabled={updateShow.isPending}
             >
-              <XIcon className="h-3 w-3 mr-1" />
-              Cancel
+              <Trash2Icon className="h-3 w-3 mr-1" />
+              Delete
             </Button>
-            <Button 
-              type="submit" 
-              size="sm"
-              disabled={createShow.isPending}
-              className="h-8 text-xs"
-            >
-              {createShow.isPending ? "Saving..." : (
-                <>
-                  <SaveIcon className="h-3 w-3 mr-1" />
-                  Save
-                </>
-              )}
-            </Button>
+            
+            <div className="flex space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={onCancel}
+                disabled={updateShow.isPending}
+                className="h-8 text-xs"
+              >
+                <XIcon className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={updateShow.isPending}
+                className="h-8 text-xs"
+              >
+                {updateShow.isPending ? "Saving..." : (
+                  <>
+                    <SaveIcon className="h-3 w-3 mr-1" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
