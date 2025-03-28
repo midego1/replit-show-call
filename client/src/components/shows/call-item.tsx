@@ -1,5 +1,4 @@
 import { CallItemProps } from "@/lib/types";
-import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { sendNotification } from "@/lib/utils";
 
 export function CallItem({ call, number }: CallItemProps) {
@@ -37,12 +36,16 @@ export function CallItem({ call, number }: CallItemProps) {
         </div>
       </div>
       <div className="text-right">
-        {call.showId && (
-          <CountdownTimer
-            startTime={new Date(call.showId)}
-            minutesBefore={call.minutesBefore}
-            onComplete={handleNotification}
-          />
+        {call.timerString ? (
+          call.timerString === "0m 00s" ? (
+            <span className="text-sm font-medium text-red-500">Now</span>
+          ) : call.minutesBefore <= 15 ? (
+            <span className="text-sm font-medium text-orange-500">{call.timerString}</span>
+          ) : (
+            <span className="text-sm font-medium text-primary">{call.timerString}</span>
+          )
+        ) : (
+          <span className="text-sm font-medium text-gray-500">Time not set</span>
         )}
       </div>
     </div>
