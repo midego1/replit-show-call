@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { BellIcon, ArrowLeftIcon, CheckIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, Link } from "wouter";
-import { requestNotificationPermission, sendNotification } from "@/lib/utils";
+import { requestNotificationPermission, sendNotification, isIOS, isNotificationsSupported } from "@/lib/utils";
 
 // Create a type that includes all possible status values explicitly
 type NotificationStatusType = "granted" | "denied" | "default" | "unsupported";
@@ -19,7 +19,7 @@ export default function NotificationSettings() {
 
   // Get current notification permission on mount
   useEffect(() => {
-    if (!("Notification" in window)) {
+    if (!isNotificationsSupported()) {
       setPermissionStatus("unsupported");
       return;
     }
@@ -29,10 +29,14 @@ export default function NotificationSettings() {
   }, []);
 
   const handleRequestPermission = async () => {
-    if (!("Notification" in window)) {
+    if (!isNotificationsSupported()) {
+      const message = isIOS() 
+        ? "iOS Safari doesn't support web notifications. Try using Chrome or Firefox on desktop."
+        : "Notifications are not supported by your browser.";
+      
       toast({
         title: "Not supported",
-        description: "Notifications are not supported by your browser.",
+        description: message,
         variant: "destructive",
       });
       return;
@@ -65,6 +69,19 @@ export default function NotificationSettings() {
   };
 
   const handleSendTestNotification = () => {
+    if (!isNotificationsSupported()) {
+      const message = isIOS() 
+        ? "iOS Safari doesn't support web notifications. Try using Chrome or Firefox on desktop."
+        : "Notifications are not supported by your browser.";
+      
+      toast({
+        title: "Not supported",
+        description: message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (Notification.permission !== "granted") {
       toast({
         title: "Notifications not enabled",
@@ -98,6 +115,23 @@ export default function NotificationSettings() {
         </Button>
         <h2 className="text-xl font-medium">Notification Settings</h2>
       </div>
+
+      {isIOS() && (
+        <Card className="mb-6 shadow-sm border-orange-200">
+          <CardHeader className="px-4 py-3 bg-orange-50 border-b border-orange-200">
+            <h3 className="font-medium flex items-center text-orange-700">
+              <BellIcon className="mr-2 h-5 w-5" />
+              iOS Not Supported
+            </h3>
+          </CardHeader>
+          <CardContent className="p-4">
+            <p className="text-sm">
+              iOS Safari doesn't support web notifications. To receive call notifications, 
+              please use Chrome or Firefox on a desktop computer.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="mb-6 shadow-sm">
         <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200">

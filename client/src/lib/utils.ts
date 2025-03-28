@@ -41,8 +41,17 @@ export function calculateTimeRemaining(showStartTime: Date, minutesBefore: numbe
   return Math.max(0, differenceInMilliseconds(callTime, now));
 }
 
+export function isIOS(): boolean {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+}
+
+export function isNotificationsSupported(): boolean {
+  return ("Notification" in window) && !isIOS();
+}
+
 export function requestNotificationPermission(): Promise<boolean> {
-  if (!("Notification" in window)) {
+  if (!isNotificationsSupported()) {
     return Promise.resolve(false);
   }
   
@@ -60,7 +69,7 @@ export function requestNotificationPermission(): Promise<boolean> {
 }
 
 export function sendNotification(title: string, options?: NotificationOptions): void {
-  if (!("Notification" in window) || Notification.permission !== "granted") {
+  if (!isNotificationsSupported() || Notification.permission !== "granted") {
     return;
   }
   
@@ -74,7 +83,7 @@ export function checkAndSendAutoNotifications(
   notifiedCallIds: Set<number>,
   setNotifiedCallIds: (callIds: Set<number>) => void
 ): void {
-  if (!("Notification" in window) || Notification.permission !== "granted") {
+  if (!isNotificationsSupported() || Notification.permission !== "granted") {
     return;
   }
   
