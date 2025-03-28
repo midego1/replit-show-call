@@ -14,7 +14,8 @@ import { Group } from "@shared/schema";
 
 // Extend the insertCallSchema with client-side validation
 const createCallSchema = z.object({
-  description: z.string().min(1, "Description is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
   minutesBefore: z.coerce
     .number()
     .min(1, "Must be at least 1 minute")
@@ -47,12 +48,14 @@ export function CreateCallDialog({
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),
     defaultValues: {
+      title: "",
       description: "",
       minutesBefore: 30,
       groupIds: [],
       showId: showId || 0
     },
     values: {
+      title: "",
       description: "",
       minutesBefore: 30,
       groupIds: selectedGroups,
@@ -103,12 +106,26 @@ export function CreateCallDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Warm-up Call" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Warm-up Call" {...field} />
+                    <Input placeholder="Additional details about this call" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

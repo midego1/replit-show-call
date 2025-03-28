@@ -50,7 +50,8 @@ export type Group = typeof groups.$inferSelect;
 // Calls
 export const calls = pgTable("calls", {
   id: serial("id").primaryKey(),
-  description: text("description").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
   minutesBefore: integer("minutes_before").notNull(),
   groupIds: text("group_ids").notNull(), // Storing JSON array of group IDs as string
   showId: integer("show_id").notNull(),

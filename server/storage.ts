@@ -241,15 +241,25 @@ export class MemStorage implements IStorage {
   async createCall(insertCall: InsertCall): Promise<Call> {
     const id = this.callId++;
     
-    // Ensure groupIds is stored as a string if it's an array
+    // Prepare the call data with proper handling of fields
     const processedCall = {
       ...insertCall,
+      title: insertCall.title || 'Untitled Call',  // Default title if none provided
+      description: insertCall.description || null, // Make sure description is null if not provided
       groupIds: Array.isArray(insertCall.groupIds) 
         ? JSON.stringify(insertCall.groupIds) 
         : insertCall.groupIds
     };
     
-    const call: Call = { ...processedCall, id };
+    const call: Call = { 
+      id,
+      title: processedCall.title,
+      description: processedCall.description,
+      minutesBefore: processedCall.minutesBefore,
+      groupIds: processedCall.groupIds,
+      showId: processedCall.showId
+    };
+    
     this.calls.set(id, call);
     return call;
   }
@@ -261,17 +271,33 @@ export class MemStorage implements IStorage {
     const call = this.calls.get(id);
     if (!call) return undefined;
     
-    // Process groupIds if it's being updated
+    // Process updates with proper handling of fields
     const processedUpdates = { 
-      ...updates,
+      // Handle description updates properly
+      description: updates.description !== undefined ? updates.description || null : call.description,
+      
+      // Handle groupIds update
       groupIds: updates.groupIds !== undefined 
         ? (Array.isArray(updates.groupIds) 
           ? JSON.stringify(updates.groupIds) 
           : updates.groupIds)
-        : call.groupIds
+        : call.groupIds,
+          
+      // Include other possible updates  
+      title: updates.title !== undefined ? updates.title : call.title,
+      minutesBefore: updates.minutesBefore !== undefined ? updates.minutesBefore : call.minutesBefore,
+      showId: updates.showId !== undefined ? updates.showId : call.showId
     };
 
-    const updatedCall = { ...call, ...processedUpdates };
+    const updatedCall: Call = {
+      id,
+      title: processedUpdates.title,
+      description: processedUpdates.description,
+      minutesBefore: processedUpdates.minutesBefore,
+      groupIds: processedUpdates.groupIds,
+      showId: processedUpdates.showId
+    };
+    
     this.calls.set(id, updatedCall);
     return updatedCall;
   }
