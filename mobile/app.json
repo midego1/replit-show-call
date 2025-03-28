@@ -33,17 +33,6 @@
         "projectId": "your-project-id"
       }
     },
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#6200EE",
-          "sounds": [
-            "./assets/notification-sound.wav"
-          ]
-        }
-      ]
-    ]
+    "plugins": []
   }
 }
