@@ -4,12 +4,12 @@ import { z } from "zod";
 import { insertCallSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group } from "@shared/schema";
-import { XIcon, SaveIcon } from "lucide-react";
+import { XIcon, SaveIcon, UsersIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Extend the insertCallSchema with client-side validation
 const createCallSchema = z.object({
@@ -115,24 +115,24 @@ export function InlineCallForm({
             name="groupId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Assign to Group</FormLabel>
-                <Select 
-                  onValueChange={(value) => field.onChange(parseInt(value))}
-                  defaultValue={field.value.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a group" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
+                <FormLabel className="flex items-center text-sm font-medium">
+                  <UsersIcon className="h-4 w-4 mr-1" /> 
+                  Assign to Group
+                </FormLabel>
+                <FormControl>
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id.toString()}>
+                      <Badge 
+                        key={group.id}
+                        variant={field.value === group.id ? "default" : "outline"}
+                        className={`cursor-pointer ${field.value === group.id ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
+                        onClick={() => field.onChange(group.id)}
+                      >
                         {group.name}
-                      </SelectItem>
+                      </Badge>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
