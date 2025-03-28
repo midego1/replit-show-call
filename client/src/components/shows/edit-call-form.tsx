@@ -281,8 +281,10 @@ export function EditCallForm({
                 )}
               />
               
-              <div className="flex justify-between pt-2">
-                <div className="flex space-x-2">
+              {/* Mobile-friendly action buttons */}
+              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                  {/* Delete button */}
                   <Button 
                     type="button" 
                     variant="ghost" 
@@ -295,7 +297,8 @@ export function EditCallForm({
                     Delete
                   </Button>
                   
-                  <div className="flex items-center space-x-2">
+                  {/* Send notification checkbox */}
+                  <div className="flex items-center space-x-2 py-1 px-2 bg-gray-50 rounded-md border border-gray-100">
                     <input
                       type="checkbox"
                       id="send-notification-now"
@@ -314,14 +317,15 @@ export function EditCallForm({
                     />
                     <label 
                       htmlFor="send-notification-now" 
-                      className="text-xs font-medium text-gray-700 cursor-pointer"
+                      className="text-xs font-medium text-gray-700 cursor-pointer truncate"
                     >
                       {isSendingNotification ? "Sending..." : "Send notification now"}
                     </label>
                   </div>
                 </div>
                 
-                <div className="flex space-x-2">
+                {/* Cancel/Save buttons */}
+                <div className="flex space-x-2 self-end sm:self-auto">
                   <Button 
                     type="button" 
                     variant="outline" 
@@ -330,8 +334,8 @@ export function EditCallForm({
                     disabled={updateCall.isPending || deleteCall.isPending || isSendingNotification}
                     className="h-8 text-xs"
                   >
-                    <XIcon className="h-3 w-3 mr-1" />
-                    Cancel
+                    <XIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="hidden sm:inline">Cancel</span>
                   </Button>
                   <Button 
                     type="submit" 
@@ -341,8 +345,8 @@ export function EditCallForm({
                   >
                     {updateCall.isPending ? "Saving..." : (
                       <>
-                        <SaveIcon className="h-3 w-3 mr-1" />
-                        Save
+                        <SaveIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="hidden sm:inline">Save</span>
                       </>
                     )}
                   </Button>
