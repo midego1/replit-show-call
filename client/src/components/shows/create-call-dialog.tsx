@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,13 +5,11 @@ import { insertCallSchema } from "@shared/schema";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Group } from "@shared/schema";
-import { XIcon, SaveIcon, BellIcon, UsersIcon } from "lucide-react";
+import { XIcon, SaveIcon } from "lucide-react";
 
 // Extend the insertCallSchema with client-side validation
 const createCallSchema = z.object({
@@ -22,7 +19,7 @@ const createCallSchema = z.object({
     .number()
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
-  groupIds: z.array(z.number()).min(1, "Please select at least one group"),
+  groupIds: z.array(z.number()).default([]),
   showId: z.coerce.number(),
   sendNotification: z.boolean().default(false)
 });
@@ -41,16 +38,6 @@ export function CreateCallDialog({
   showId 
 }: CreateCallDialogProps) {
   const queryClient = useQueryClient();
-  const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
-  
-  // Only show show-specific groups
-  const { data: showGroups = [] } = useQuery<Group[]>({
-    queryKey: showId ? ["/api/shows", showId, "groups"] : [],
-    enabled: open && showId !== null
-  });
-  
-  // Only use show-specific groups
-  const groups = [...showGroups];
   
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),
@@ -59,14 +46,6 @@ export function CreateCallDialog({
       description: "",
       minutesBefore: 30,
       groupIds: [],
-      showId: showId || 0,
-      sendNotification: false
-    },
-    values: {
-      title: "",
-      description: "",
-      minutesBefore: 30,
-      groupIds: selectedGroups,
       showId: showId || 0,
       sendNotification: false
     }
@@ -83,25 +62,12 @@ export function CreateCallDialog({
         queryClient.invalidateQueries({ queryKey: [`/api/shows/${showId}/calls`] });
       }
       form.reset();
-      setSelectedGroups([]);
       onOpenChange(false);
     }
   });
   
   const onSubmit = (values: CreateCallFormValues) => {
     createCall.mutate(values);
-  };
-  
-  const toggleGroup = (groupId: number) => {
-    setSelectedGroups(prev => {
-      const newSelection = prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId];
-      
-      // Update the form value
-      form.setValue("groupIds", newSelection, { shouldValidate: true });
-      return newSelection;
-    });
   };
   
   return (
@@ -156,35 +122,6 @@ export function CreateCallDialog({
                       {...field} 
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="groupIds"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Assign to Groups</FormLabel>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {groups.length > 0 ? (
-                      groups.map((group) => (
-                        <Badge 
-                          key={group.id}
-                          variant={selectedGroups.includes(group.id) ? "default" : "outline"} 
-                          className="cursor-pointer p-2"
-                          onClick={() => toggleGroup(group.id)}
-                        >
-                          {group.name}
-                        </Badge>
-                      ))
-                    ) : (
-                      <div className="text-sm text-gray-500 py-1">
-                        No groups available. Please add show-specific groups in the Groups tab first.
-                      </div>
-                    )}
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}

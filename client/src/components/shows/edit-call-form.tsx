@@ -4,12 +4,11 @@ import { z } from "zod";
 import { insertCallSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Group, Call } from "@shared/schema";
+import { Call } from "@shared/schema";
 import { SaveIcon, XIcon, Trash2Icon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,7 +20,7 @@ const editCallSchema = z.object({
     .number()
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
-  groupIds: z.array(z.number()).min(1, "Please select at least one group"),
+  groupIds: z.array(z.number()).default([]),
   showId: z.coerce.number(),
   sendNotification: z.boolean().default(false)
 });
@@ -44,16 +43,7 @@ export function EditCallForm({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Only show show-specific groups
-  const { data: showGroups = [] } = useQuery<Group[]>({
-    queryKey: call.showId ? ["/api/shows", call.showId, "groups"] : [],
-    enabled: !!call.showId
-  });
-  
-  // Only use show-specific groups
-  const groups = [...showGroups];
-  
-  // Parse groupIds from string if needed
+  // Parse groupIds from string if needed - keeping this for backward compatibility
   const initialGroupIds = typeof call.groupIds === 'string'
     ? JSON.parse(call.groupIds as string)
     : (call.groupIds || []);
@@ -104,20 +94,7 @@ export function EditCallForm({
     }
   });
   
-  // Toggle group selection
-  const toggleGroup = (groupId: number) => {
-    const currentSelection = form.getValues("groupIds") || [];
-    const isSelected = currentSelection.includes(groupId);
-    
-    const newSelection = isSelected
-      ? currentSelection.filter(id => id !== groupId)
-      : [...currentSelection, groupId];
-    
-    // Update the form value
-    form.setValue("groupIds", newSelection, { shouldValidate: true });
-  };
-  
-  // The notification function has been removed
+  // The notification and group functions have been removed
   
   return (
     <div className="p-4 bg-gray-50 border-b border-gray-200">
@@ -174,38 +151,6 @@ export function EditCallForm({
                     <FormControl>
                       <Input placeholder="Additional details" {...field} className="h-9" />
                     </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="groupIds"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-medium">Groups</FormLabel>
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {groups.length > 0 ? (
-                        groups.map(group => {
-                          const isSelected = field.value?.includes(group.id);
-                          return (
-                            <Badge
-                              key={group.id}
-                              variant={isSelected ? "default" : "outline"}
-                              className={`cursor-pointer text-xs px-2 py-0.5 ${isSelected ? "bg-primary" : ""}`}
-                              onClick={() => toggleGroup(group.id)}
-                            >
-                              {group.name}
-                            </Badge>
-                          );
-                        })
-                      ) : (
-                        <div className="text-sm text-gray-500 py-1">
-                          No groups available. Please add show-specific groups in the Groups tab first.
-                        </div>
-                      )}
-                    </div>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}

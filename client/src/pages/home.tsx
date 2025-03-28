@@ -175,7 +175,6 @@ export default function Home() {
                 key={show.id}
                 show={show}
                 calls={processedCalls}
-                groups={showGroups}
                 expanded={expandedShowId === show.id}
                 onToggleExpand={() => handleToggleExpand(show.id)}
                 onAddCall={handleAddCall}

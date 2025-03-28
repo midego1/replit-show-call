@@ -1,4 +1,4 @@
-import { HomeIcon, ClipboardListIcon, UsersIcon, SettingsIcon } from "lucide-react";
+import { HomeIcon, ClipboardListIcon, SettingsIcon } from "lucide-react";
 import { TabOption } from "@/lib/types";
 
 interface BottomNavProps {
@@ -17,11 +17,6 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
       id: "shows",
       label: "Shows",
       icon: <ClipboardListIcon className="w-5 h-5" />,
-    },
-    {
-      id: "groups",
-      label: "Groups",
-      icon: <UsersIcon className="w-5 h-5" />,
     },
     {
       id: "profile",

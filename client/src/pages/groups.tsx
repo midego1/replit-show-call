@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Group, Show, insertGroupSchema } from "@shared/schema";
-import { GroupWithDetails } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Edit2Icon, Trash2Icon, CheckIcon, PlusCircleIcon } from "lucide-react";
@@ -36,6 +35,11 @@ const createGroupSchema = insertGroupSchema.extend({
 });
 
 type CreateGroupValues = z.infer<typeof createGroupSchema>;
+
+// Define GroupWithDetails type locally since we removed it from types.ts
+type GroupWithDetails = Group & {
+  icon?: string;
+};
 
 export default function Groups() {
   const { toast } = useToast();

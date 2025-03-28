@@ -18,7 +18,6 @@ import { Separator } from "@/components/ui/separator";
 export function ShowCard({ 
   show, 
   calls, 
-  groups,
   expanded, 
   onToggleExpand,
   onAddCall

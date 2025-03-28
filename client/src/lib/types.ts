@@ -1,4 +1,4 @@
-import { Show, Call, Group } from "@shared/schema";
+import { Show, Call } from "@shared/schema";
 
 export interface ShowWithDetails extends Show {
   timeRemaining?: string;
@@ -8,19 +8,12 @@ export interface ShowWithDetails extends Show {
 
 export interface CallWithDetails extends Call {
   number?: number;
-  groupName?: string;
-  groupNames?: string[];
   timerString?: string;
-}
-
-export interface GroupWithDetails extends Group {
-  icon?: string;
 }
 
 export type ShowCardProps = {
   show: ShowWithDetails;
   calls: CallWithDetails[];
-  groups: GroupWithDetails[];
   expanded: boolean;
   onToggleExpand: (id: number) => void;
   onAddCall: (showId: number) => void;
@@ -31,4 +24,4 @@ export type CallItemProps = {
   number: number;
 };
 
-export type TabOption = "home" | "shows" | "groups" | "profile";
+export type TabOption = "home" | "shows" | "profile";

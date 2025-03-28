@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Shows from "@/pages/shows";
-import Groups from "@/pages/groups";
 import Profile from "@/pages/profile";
 import AuthPage from "@/pages/auth-page";
 import { BottomNav } from "@/components/navigation/bottom-nav";
@@ -86,15 +85,6 @@ function Router() {
         return (
           <AuthenticatedLayout>
             <Shows />
-          </AuthenticatedLayout>
-        );
-      }} />
-      
-      <ProtectedRoute path="/groups" component={() => {
-        setActiveTab("groups");
-        return (
-          <AuthenticatedLayout>
-            <Groups />
           </AuthenticatedLayout>
         );
       }} />

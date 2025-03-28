@@ -54,7 +54,7 @@ export function CallItem({ call, number }: CallItemProps) {
           
           <div className="flex-grow">
             <div className="flex justify-between items-start">
-              {/* Left side - Title and group tags */}
+              {/* Left side - Title and description */}
               <div className="flex flex-col">
                 <span className="text-gray-900 font-medium">
                   {call.title || 'Untitled Call'}
@@ -73,18 +73,6 @@ export function CallItem({ call, number }: CallItemProps) {
                 {call.description && (
                   <span className="text-gray-500 text-xs mt-1">{call.description}</span>
                 )}
-                
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {call.groupNames && call.groupNames.map((groupName, idx) => (
-                    <span 
-                      key={idx} 
-                      className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {groupName}
-                    </span>
-                  ))}
-                </div>
               </div>
               
               {/* Right side - Timer */}
