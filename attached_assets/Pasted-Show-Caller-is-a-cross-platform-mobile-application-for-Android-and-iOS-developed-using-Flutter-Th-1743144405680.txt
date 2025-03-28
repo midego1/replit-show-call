@@ -1,0 +1,238 @@
+Show Caller" is a cross-platform mobile application for Android and iOS, developed using Flutter. The app allows users to create and manage shows, schedule calls at specific times before each show, and assign these calls to specific groups (e.g., cast, crew, etc.). It features user authentication, real-time countdown timers, push notifications, and a minimalistic, elegant UI with a bottom navigation bar. The design prioritizes a single-screen experience, avoiding unnecessary page transitions, and mirrors the clean aesthetic of the provided screenshot with a focus on simplicity and functionality.
+Objectives
+Allow users to create and manage shows and their associated calls.
+
+Enable assignment of calls to specific groups (e.g., cast, crew).
+
+Display real-time countdown timers for each call.
+
+Send notifications to the relevant group when a call’s countdown reaches zero.
+
+Deliver a smooth, minimalistic, and visually appealing UI with a bottom navigation bar.
+Key Features
+1. Authentication
+Description: Secure user access to the app.
+
+Details:
+Email and password-based sign-up and login.
+
+Logout functionality.
+2. Show Management
+Description: Enable users to create and organize shows.
+
+Details:
+Create a show with a name, description (optional), and start time.
+
+Edit or delete existing shows.
+
+Shows are linked to the authenticated user.
+3. Call Management
+Description: Add calls to a show, scheduled a certain number of minutes before the show starts, and assign them to specific groups.
+
+Details:
+Add a call by specifying the minutes before the show (e.g., 30 minutes).
+
+Assign the call to a group (e.g., "Cast", "Crew", "All", etc.).
+
+Edit or delete calls.
+
+Calls are associated with a specific show.
+4. Group Management
+Description: Allow users to define groups for calls.
+
+Details:
+Predefined groups: "All", "Cast", "Crew", "Staff", "Guests".
+
+Option to add custom groups per show (e.g., "Lighting Team").
+
+Users can select a group when creating or editing a call.
+5. Countdown Timers
+Description: Show the time remaining until each call.
+
+Details:
+Real-time countdown timers for each call, displayed in the format "XX m YY s" (e.g., "25 m 00 s").
+
+Calculated as the difference between the show’s start time and the call’s scheduled time.
+6. Notifications
+Description: Notify users in the assigned group when a call’s countdown reaches zero.
+
+Details:
+Push notifications triggered at the exact call time for users in the specified group.
+
+Notifications work even when the app is closed.
+
+Notification content includes the call details and the group (e.g., "Crew Call: Warm-up in 0 minutes").
+7. User Interface
+Description: A clean, minimalistic UI with a bottom navigation bar, inspired by the provided screenshot.
+
+Details:
+Bottom navigation bar with icons for key sections (e.g., Home, Shows, Profile).
+
+Single-screen design using expandable sections or modals to minimize navigation.
+
+Floating Action Button (FAB) for adding new shows or calls.
+
+Display the assigned group next to each call in the UI.
+
+Smooth animations and a polished, minimalistic theme.
+Technical Requirements
+Platforms: Android and iOS, built with Flutter for cross-platform compatibility.
+
+Authentication: Firebase Authentication with email/password support.
+
+Data Storage: Firebase Firestore for real-time storage of user, show, call, and group data.
+
+Notifications: flutter_local_notifications plugin for scheduling and triggering local notifications.
+
+UI Framework: Flutter’s Material Design with custom theming for a minimalistic look.
+
+Real-time Updates: Firestore snapshots to update the UI without refreshes.
+User Flow
+Login/Signup:
+User opens the app and logs in or signs up with email and password.
+
+After authentication, they are directed to the Home screen.
+View Upcoming Calls:
+Home screen displays a list of upcoming calls with countdown timers and assigned groups.
+Manage Shows and Groups:
+Shows screen lists all shows; users can expand a show to view or add calls via a modal.
+
+Create a new show using a modal from the Home or Shows screen.
+
+Define custom groups for a show during show creation or editing.
+Assign Calls to Groups:
+When adding or editing a call, select a group from a dropdown (e.g., "Cast", "Crew", or custom groups).
+Receive Notifications:
+When a call’s countdown reaches zero, users in the assigned group receive a notification.
+Data Model
+Shows Collection
+Path: shows/{showId}
+
+Fields:
+id: String (unique identifier)
+
+userId: String (ID of the user who created the show)
+
+name: String (e.g., "Evening Performance")
+
+description: String (optional, e.g., "The best show ever.")
+
+startTime: Timestamp (date and time of the show start)
+
+groups: Array of Strings (e.g., ["All", "Cast", "Crew", "Lighting Team"])
+Calls Subcollection
+Path: shows/{showId}/calls/{callId}
+
+Fields:
+id: String (unique identifier)
+
+showId: String (reference to the parent show)
+
+userId: String (for user-specific queries)
+
+minutesBefore: Integer (minutes before the show, e.g., 25)
+
+callTime: Timestamp (calculated as startTime - minutesBefore)
+
+description: String (optional, e.g., "Warm-up call")
+
+group: String (e.g., "Cast", "Crew", or a custom group)
+UI Components
+Login Screen
+Fields for email and password.
+
+Buttons for sign-up and login.
+Bottom Navigation Bar
+Tabs (inspired by the screenshot):
+Home: Displays upcoming calls (similar to "Schedule" in the screenshot).
+
+Shows: Lists all shows with management options (similar to "History").
+
+Profile: User info and logout (similar to "Notes").
+Home Screen
+Content: List of upcoming calls, sorted by callTime.
+
+Details:
+Each call displays its name (e.g., "01 Warm-up Call"), assigned group (e.g., "[Cast]"), and countdown timer (e.g., "25 m 00 s").
+
+Mimics the list style in the screenshot with numbered items, group labels, and timers on the right.
+Action: FAB (bottom-right, like the "+" in the screenshot) to create a new show.
+Shows Screen
+Content: List of shows with expandable sections.
+
+Details:
+Each show displays its name, description, and start time (e.g., "Lasagna" and "The world’s best lasagna.").
+
+Expanded view shows calls with their minutes before, assigned group, and countdown timers.
+
+Options to edit/delete show, manage groups, or add a call via a modal.
+Action: FAB to create a new show.
+Profile Screen
+Content: User email and a logout button.
+Modals
+Create/Edit Show:
+Fields for name, description, and start time.
+
+Section to define custom groups (e.g., add "Lighting Team" to the default list).
+Create/Edit Call:
+Field for minutes before and optional description.
+
+Dropdown to select a group (populated with "All", "Cast", "Crew", and any custom groups for the show).
+Notifications
+Scheduling: Use flutter_local_notifications to schedule notifications at callTime, using the call id as the identifier.
+
+Management:
+Add/Update: Schedule or reschedule notifications with the call id.
+
+Delete: Cancel notifications using the call id.
+Behavior:
+Notifications are sent to users in the specified group (for simplicity, in this version, the app assumes the user belongs to all groups; in a multi-user setup, this would require user-group mapping).
+
+Notifications trigger even when the app is closed; tapping opens the app to the Home screen.
+
+Notification message includes the group (e.g., "Cast Call: Warm-up in 0 minutes").
+Design Guidelines
+Color Scheme: Light background with subtle accents (e.g., grey icons, black text, as seen in the screenshot).
+
+Typography: Clean, sans-serif fonts with clear hierarchy (e.g., bold for titles, regular for descriptions).
+
+Animations: Smooth transitions (e.g., fade for modals, slide for expanding sections).
+
+Components:
+List items styled like the screenshot: numbered, with text and group label on the left, timers on the right.
+
+Bottom navigation bar with icons (e.g., calendar, history, user profile).
+
+FAB in the bottom-right corner for adding new items.
+Responsiveness: Adapts to various screen sizes while maintaining the minimalistic layout.
+Edge Cases
+Past Calls: Prevent adding calls with a callTime in the past; show an error message.
+
+Show Time Updates: Recalculate callTime for all calls and reschedule notifications if a show’s startTime changes.
+
+Group Changes: If a show’s groups are updated, ensure existing calls are still valid (e.g., if a group is deleted, reassign calls to "All").
+
+Offline Support: Use Firestore’s offline persistence; sync data and notifications when online.
+
+Multi-Device: Data syncs via Firestore; each device schedules its own notifications based on local data.
+Implementation Steps
+Project Setup: Initialize a Flutter project with dependencies (firebase_auth, cloud_firestore, flutter_local_notifications).
+
+Authentication: Integrate Firebase Authentication for login/signup flows.
+
+Data Layer: Set up Firestore with CRUD operations for shows, calls, and group management.
+
+UI Development:
+Build the bottom navigation bar and screens, mirroring the screenshot’s style.
+
+Implement real-time data binding with Firestore snapshots.
+
+Add modals for show/call management with group selection.
+Countdown Timers: Use a package (e.g., flutter_countdown_timer) or custom Timer for countdowns.
+
+Notifications: Implement scheduling logic with flutter_local_notifications, including group-specific messaging.
+
+Polish: Apply custom themes, animations, and test responsiveness.
+
+Testing: Verify functionality on Android and iOS, including auth, group assignments, notifications, and UI behavior.
+
