@@ -1,27 +1,27 @@
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useCallback } from "react";
 
 interface FloatingActionButtonProps {
   onClick: () => void;
 }
 
 export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
-  // Handle touch events to improve touch responsiveness
-  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
-    // Prevent ghost clicks and double firing of events
-    e.preventDefault();
-    onClick();
-  };
-
+  // Use wrapper div for better iOS touch handling
   return (
-    <Button
+    <div 
+      className="fixed right-6 bottom-20 z-20 touch-manipulation"
       onClick={onClick}
-      onTouchStart={handleTouchStart}
-      className="fixed right-6 bottom-20 w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-20 active:bg-primary/90"
+      role="button"
       aria-label="Add new item"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      <PlusIcon className="h-6 w-6" />
-    </Button>
+      <Button
+        type="button"
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:bg-primary/90"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </Button>
+    </div>
   );
 }

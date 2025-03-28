@@ -198,19 +198,19 @@ export default function Shows() {
           )}
           
           {!showAddForm && (
-            <Button
+            <div 
+              className="w-full mb-2 cursor-pointer touch-manipulation"
               onClick={() => setShowAddForm(true)}
-              variant="outline"
-              className="w-full mb-2 py-4 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary active:bg-primary/5"
-              onTouchStart={(e) => {
-                // Prevent ghost clicks
-                e.preventDefault();
-                setShowAddForm(true);
-              }}
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Add New Show
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full py-4 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary active:bg-primary/5"
+              >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Add New Show
+              </Button>
+            </div>
           )}
           
           {processedShows.map(renderShowCard)}
