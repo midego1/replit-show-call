@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { ShowCardProps } from "@/lib/types";
 import { CallItem } from "@/components/shows/call-item";
 import { InlineCallForm } from "@/components/shows/inline-call-form";
+import { ShowCountdown } from "@/components/shows/show-countdown";
 import { 
   ChevronDownIcon, 
   ChevronUpIcon,
@@ -41,19 +42,25 @@ export function ShowCard({
   return (
     <Card className="overflow-hidden shadow-sm">
       <CardHeader 
-        className="px-5 py-4 flex flex-row items-center justify-between cursor-pointer"
+        className="px-5 py-4 flex flex-col cursor-pointer"
         onClick={() => onToggleExpand(show.id)}
       >
-        <div>
-          <h3 className="text-lg font-medium">{show.name}</h3>
-          <p className="text-sm text-gray-500">{show.description}</p>
-        </div>
-        <div className="flex items-center">
-          <div className="flex items-center mr-3 text-sm text-gray-500">
-            <ClockIcon className="w-4 h-4 mr-1" />
-            <span>{show.timeRemaining}</span>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-medium">{show.name}</h3>
+            <p className="text-sm text-gray-500">{show.description}</p>
           </div>
-          {expanded ? <ChevronUpIcon className="text-gray-500" /> : <ChevronDownIcon className="text-gray-500" />}
+          <div>
+            {expanded ? <ChevronUpIcon className="text-gray-500" /> : <ChevronDownIcon className="text-gray-500" />}
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center text-sm text-gray-500">
+            <CalendarIcon className="w-4 h-4 mr-1" />
+            <span>{show.formattedDate} {show.formattedTime}</span>
+          </div>
+          <ShowCountdown show={show} />
         </div>
       </CardHeader>
       

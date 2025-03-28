@@ -37,16 +37,8 @@ function Router() {
     <div className="pb-16 min-h-screen">
       {/* Header */}
       <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-10">
-        <div className="container mx-auto flex items-center justify-between px-4 h-14">
-          <h1 className="text-lg font-medium">Show Caller</h1>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 focus:outline-none">
-              <BellIcon className="h-5 w-5" />
-            </button>
-            <button className="text-gray-500 focus:outline-none">
-              <SettingsIcon className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="container mx-auto flex items-center justify-center px-4 h-14">
+          <h1 className="text-xl font-semibold">Show Caller</h1>
         </div>
       </header>
       

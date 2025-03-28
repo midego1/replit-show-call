@@ -18,7 +18,8 @@ const createCallSchema = z.object({
     .number()
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
-  groupId: z.coerce.number({ required_error: "Please select a group" }),
+  // Changed from single groupId to array of groupIds
+  groupIds: z.array(z.number()).min(1, "Please select at least one group"),
   showId: z.coerce.number()
 });
 
@@ -47,7 +48,7 @@ export function InlineCallForm({
     defaultValues: {
       description: "",
       minutesBefore: 30,
-      groupId: groups.length > 0 ? groups[0].id : 0,
+      groupIds: groups.length > 0 ? [groups[0].id] : [],
       showId: showId
     }
   });
@@ -112,25 +113,36 @@ export function InlineCallForm({
           
           <FormField
             control={form.control}
-            name="groupId"
+            name="groupIds"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center text-sm font-medium">
                   <UsersIcon className="h-4 w-4 mr-1" /> 
-                  Assign to Group
+                  Assign to Groups (select multiple)
                 </FormLabel>
                 <FormControl>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {groups.map((group) => (
-                      <Badge 
-                        key={group.id}
-                        variant={field.value === group.id ? "default" : "outline"}
-                        className={`cursor-pointer ${field.value === group.id ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
-                        onClick={() => field.onChange(group.id)}
-                      >
-                        {group.name}
-                      </Badge>
-                    ))}
+                    {groups.map((group) => {
+                      const isSelected = field.value.includes(group.id);
+                      return (
+                        <Badge 
+                          key={group.id}
+                          variant={isSelected ? "default" : "outline"}
+                          className={`cursor-pointer ${isSelected ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
+                          onClick={() => {
+                            if (isSelected) {
+                              // Remove group if already selected
+                              field.onChange(field.value.filter(id => id !== group.id));
+                            } else {
+                              // Add group if not selected
+                              field.onChange([...field.value, group.id]);
+                            }
+                          }}
+                        >
+                          {group.name}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </FormControl>
                 <FormMessage />

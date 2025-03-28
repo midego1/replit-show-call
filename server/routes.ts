@@ -147,9 +147,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/calls", async (req, res) => {
     try {
-      const callData = insertCallSchema.parse(req.body);
-      const call = await storage.createCall(callData);
-      res.status(201).json(call);
+      // Check if we have the new format with groupIds array
+      if (Array.isArray(req.body.groupIds) && req.body.groupIds.length > 0) {
+        // Handle multiple groupIds by creating a call for each group
+        const { groupIds, ...callBase } = req.body;
+        const createdCalls: Call[] = [];
+
+        // Create a call for each selected group
+        for (const groupId of groupIds) {
+          const callData = insertCallSchema.parse({
+            ...callBase,
+            groupId: groupId
+          });
+          const call = await storage.createCall(callData);
+          createdCalls.push(call);
+        }
+        
+        // Return the first call as the primary response
+        // The client can refetch to get all calls if needed
+        res.status(201).json(createdCalls[0]);
+      } else {
+        // Original single group behavior
+        const callData = insertCallSchema.parse(req.body);
+        const call = await storage.createCall(callData);
+        res.status(201).json(call);
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ errors: error.errors });
