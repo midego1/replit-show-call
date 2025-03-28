@@ -80,39 +80,7 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <Card className="mb-8 shadow-sm overflow-hidden">
-        <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-medium">Help & Support</h3>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ul className="divide-y divide-gray-200">
-            <li>
-              <Button 
-                variant="ghost" 
-                className="w-full flex items-center justify-between px-4 py-3 text-gray-900 hover:bg-gray-50"
-              >
-                <div className="flex items-center">
-                  <HelpCircleIcon className="mr-3 h-5 w-5 text-gray-500" />
-                  <span>FAQs</span>
-                </div>
-                <ChevronRightIcon className="h-5 w-5 text-gray-400" />
-              </Button>
-            </li>
-            <li>
-              <Button 
-                variant="ghost" 
-                className="w-full flex items-center justify-between px-4 py-3 text-gray-900 hover:bg-gray-50"
-              >
-                <div className="flex items-center">
-                  <MessageSquareIcon className="mr-3 h-5 w-5 text-gray-500" />
-                  <span>Contact Support</span>
-                </div>
-                <ChevronRightIcon className="h-5 w-5 text-gray-400" />
-              </Button>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+      
 
       <Button 
         variant="destructive" 
