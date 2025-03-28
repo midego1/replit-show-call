@@ -174,14 +174,11 @@ export function InlineCallForm({
             name="sendNotification"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
+                <div>
                   <FormLabel className="flex items-center text-sm font-medium">
                     <BellIcon className="h-4 w-4 mr-1" />
-                    Auto Notifications
+                    Send Notification
                   </FormLabel>
-                  <FormDescription className="text-xs text-muted-foreground">
-                    Send notification automatically when call time is reached
-                  </FormDescription>
                 </div>
                 <FormControl>
                   <Switch

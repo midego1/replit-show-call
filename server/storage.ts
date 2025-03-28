@@ -63,7 +63,7 @@ export class MemStorage implements IStorage {
 
   private createDefaultGroups() {
     const defaultGroups = [
-      { name: "All", isCustom: 0, showId: null },
+      { name: "Cast", isCustom: 0, showId: null },
       { name: "Crew", isCustom: 0, showId: null }
     ];
     
@@ -196,12 +196,12 @@ export class MemStorage implements IStorage {
     // Only allow deletion of custom groups
     if (group.isCustom === 0) return false;
     
-    // Update any calls using this group to use the "All" group
-    const allGroup = Array.from(this.groups.values()).find(
-      (g) => g.name === "All" && g.isCustom === 0
+    // Update any calls using this group to use the "Cast" group
+    const castGroup = Array.from(this.groups.values()).find(
+      (g) => g.name === "Cast" && g.isCustom === 0
     );
     
-    if (allGroup) {
+    if (castGroup) {
       // Update calls that have this group in their groupIds
       Array.from(this.calls.values()).forEach((call) => {
         // Parse groupIds if it's a string
@@ -211,10 +211,10 @@ export class MemStorage implements IStorage {
         
         // Check if this group is in the array
         if (groupIdsArray.includes(id)) {
-          // Remove the group from the array and add the All group if not already there
+          // Remove the group from the array and add the Cast group if not already there
           const updatedGroupIds = groupIdsArray
             .filter(gId => gId !== id)
-            .concat(groupIdsArray.includes(allGroup.id) ? [] : [allGroup.id]);
+            .concat(groupIdsArray.includes(castGroup.id) ? [] : [castGroup.id]);
           
           // Update the call
           this.calls.set(call.id, { 
@@ -358,7 +358,7 @@ export class DatabaseStorage implements IStorage {
     if (existingGroups.length === 0) {
       // Create default groups
       const defaultGroups = [
-        { name: "All", isCustom: 0, showId: null },
+        { name: "Cast", isCustom: 0, showId: null },
         { name: "Crew", isCustom: 0, showId: null }
       ];
       
@@ -481,20 +481,20 @@ export class DatabaseStorage implements IStorage {
         return false;
       }
       
-      // Find the All group
-      const [allGroup] = await tx.select().from(groups).where(
+      // Find the Cast group
+      const [castGroup] = await tx.select().from(groups).where(
         and(
-          eq(groups.name, "All"),
+          eq(groups.name, "Cast"),
           eq(groups.isCustom, 0)
         )
       );
       
       // Update calls with this group
-      if (allGroup) {
+      if (castGroup) {
         // Get all calls that include this group
         const callsWithGroup = await tx.select().from(calls);
         
-        // Update each call to replace the deleted group with the All group
+        // Update each call to replace the deleted group with the Cast group
         for (const call of callsWithGroup) {
           // Parse the groupIds string to an array
           const groupIds = JSON.parse(call.groupIds) as number[];
@@ -503,7 +503,7 @@ export class DatabaseStorage implements IStorage {
             // Remove the group being deleted
             const updatedGroupIds = groupIds
               .filter(gId => gId !== id)
-              .concat(groupIds.includes(allGroup.id) ? [] : [allGroup.id]);
+              .concat(groupIds.includes(castGroup.id) ? [] : [castGroup.id]);
             
             // Update the call
             await tx.update(calls)

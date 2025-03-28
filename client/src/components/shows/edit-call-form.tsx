@@ -206,11 +206,8 @@ export function EditCallForm({
                 name="sendNotification"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-xs font-medium">Auto Notifications</FormLabel>
-                      <FormDescription className="text-xs text-muted-foreground">
-                        Send notification automatically when call time is reached
-                      </FormDescription>
+                    <div>
+                      <FormLabel className="text-xs font-medium">Send Notification</FormLabel>
                     </div>
                     <FormControl>
                       <Switch
