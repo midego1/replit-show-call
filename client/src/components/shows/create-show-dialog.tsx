@@ -1,16 +1,14 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertShowSchema } from "@shared/schema";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { PlusIcon, CheckIcon } from "lucide-react";
 
 // Extend the insertShowSchema with client-side fields for the form
 const createShowSchema = z.object({
@@ -18,7 +16,6 @@ const createShowSchema = z.object({
   description: z.string().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format"),
-  groups: z.array(z.string())
 });
 
 type CreateShowFormValues = z.infer<typeof createShowSchema>;
@@ -29,7 +26,6 @@ interface CreateShowDialogProps {
 }
 
 export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) {
-  const [selectedGroups, setSelectedGroups] = useState<string[]>(["All", "Cast", "Crew"]);
   const queryClient = useQueryClient();
   
   const form = useForm<CreateShowFormValues>({
@@ -39,7 +35,6 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
       description: "",
       date: new Date().toISOString().split("T")[0],
       time: "19:00",
-      groups: ["All", "Cast", "Crew"]
     }
   });
   
@@ -65,25 +60,15 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
   });
   
   const onSubmit = (values: CreateShowFormValues) => {
-    values.groups = selectedGroups;
     createShow.mutate(values);
   };
-  
-  const toggleGroup = (group: string) => {
-    setSelectedGroups(prev => 
-      prev.includes(group)
-        ? prev.filter(g => g !== group)
-        : [...prev, group]
-    );
-  };
-  
-  const defaultGroups = ["All", "Cast", "Crew", "Staff", "Guests"];
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Show</DialogTitle>
+          <DialogDescription>Add a new show to your calendar</DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
@@ -149,38 +134,6 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
                 )}
               />
             </div>
-            
-            <FormItem>
-              <FormLabel>Groups</FormLabel>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {defaultGroups.map(group => (
-                  <Button
-                    key={group}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={`rounded-full flex items-center ${
-                      selectedGroups.includes(group) 
-                        ? "bg-blue-100 text-blue-800 border-blue-300" 
-                        : ""
-                    }`}
-                    onClick={() => toggleGroup(group)}
-                  >
-                    <span>{group}</span>
-                    {selectedGroups.includes(group) && <CheckIcon className="ml-1 h-4 w-4" />}
-                  </Button>
-                ))}
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  className="rounded-full"
-                >
-                  <PlusIcon className="mr-1 h-4 w-4" />
-                  Custom
-                </Button>
-              </div>
-            </FormItem>
             
             <DialogFooter className="pt-4 border-t">
               <Button 

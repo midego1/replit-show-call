@@ -2,27 +2,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertShowSchema } from "@shared/schema";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { Show } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Show } from "@shared/schema";
 
-// Extend the insertShowSchema with client-side validation
+// Extend the insertShowSchema with client-side fields for the form
 const editShowSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Show name is required"),
   description: z.string().optional(),
-  startTime: z.date({
-    required_error: "Please select a date and time",
-  }),
-  startTimeStr: z.string().optional()
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Time must be in HH:MM format"),
 });
 
 type EditShowFormValues = z.infer<typeof editShowSchema>;
@@ -40,29 +34,45 @@ export function EditShowDialog({
 }: EditShowDialogProps) {
   const queryClient = useQueryClient();
   
-  const form = useForm<EditShowFormValues>({
-    resolver: zodResolver(editShowSchema),
-    defaultValues: {
-      name: show?.name || "",
-      description: show?.description || "",
-      startTime: show ? new Date(show.startTime) : new Date(),
-    },
-    values: show ? {
+  // Format the date and time from the show object
+  const getDefaultValues = () => {
+    if (!show) return {
+      name: "",
+      description: "",
+      date: new Date().toISOString().split("T")[0],
+      time: "19:00"
+    };
+    
+    const startTime = new Date(show.startTime);
+    const date = startTime.toISOString().split("T")[0];
+    const time = startTime.toTimeString().slice(0, 5); // Get HH:MM format
+    
+    return {
       name: show.name,
       description: show.description || "",
-      startTime: new Date(show.startTime),
-    } : undefined
+      date,
+      time
+    };
+  };
+  
+  const form = useForm<EditShowFormValues>({
+    resolver: zodResolver(editShowSchema),
+    defaultValues: getDefaultValues(),
+    values: show ? getDefaultValues() : undefined
   });
   
   const updateShow = useMutation({
     mutationFn: async (values: EditShowFormValues) => {
       if (!show) return null;
       
+      // Combine date and time into a Date object
+      const startTime = new Date(`${values.date}T${values.time}`);
+      
       // Format the values for the API
       const formattedValues = {
         name: values.name,
         description: values.description || "",
-        startTime: values.startTime.toISOString()
+        startTime: startTime.toISOString()
       };
       
       const response = await apiRequest("PATCH", `/api/shows/${show.id}`, formattedValues);
@@ -84,6 +94,7 @@ export function EditShowDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Show</DialogTitle>
+          <DialogDescription>Modify the details of your show</DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
@@ -93,9 +104,9 @@ export function EditShowDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Show Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Show name" {...field} />
+                    <Input placeholder="e.g., Evening Performance" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,67 +118,48 @@ export function EditShowDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
+                  <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Show description" {...field} />
+                    <Textarea 
+                      placeholder="Brief description of the show" 
+                      className="resize-none" 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="startTime"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date and time</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP p")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                      <div className="p-3 border-t border-border">
-                        <Input
-                          type="time"
-                          value={format(field.value, "HH:mm")}
-                          onChange={(e) => {
-                            const [hours, minutes] = e.target.value.split(':');
-                            const newDate = new Date(field.value);
-                            newDate.setHours(parseInt(hours, 10));
-                            newDate.setMinutes(parseInt(minutes, 10));
-                            field.onChange(newDate);
-                          }}
-                          className="w-full"
-                        />
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <DialogFooter className="pt-4 border-t">
               <Button 
