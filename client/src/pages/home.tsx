@@ -12,8 +12,6 @@ import {
   checkAndSendAutoNotifications,
   requestNotificationPermission
 } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { BellIcon } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -113,18 +111,6 @@ export default function Home() {
   
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
-      {/* Notification Settings Button */}
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 text-sm"
-          onClick={() => setLocation("/notification-settings")}
-        >
-          <BellIcon className="h-4 w-4" />
-          Notification Settings
-        </Button>
-      </div>
       
       {/* Shows list */}
       <div className="space-y-6">
