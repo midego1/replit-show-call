@@ -77,33 +77,18 @@ export default function Home() {
   
   // Check for calls that need auto-notifications
   useEffect(() => {
-    if (!shows.length || !allCalls.length || !allGroups.length) return;
+    if (!shows.length || !allCalls.length) return;
     
     const checkNotifications = () => {
-      // First, enrich calls with group names for notification messages
+      // Process calls to ensure they have the proper format
       const processedCalls = allCalls.map(call => {
         // Find the show this call belongs to
         const show = shows.find(s => s.id === call.showId);
         if (!show) return call;
         
-        // Process groupIds from string to array if needed
-        const groupIdsArray = typeof call.groupIds === 'string'
-          ? JSON.parse(call.groupIds as string)
-          : (call.groupIds || []);
-        
-        // Get relevant groups for this show
-        const relevantGroups = allGroups.filter(
-          group => (group.isCustom === 0 || group.showId === show.id)
-        );
-        
-        // Get group names for this call
-        const groupNames = relevantGroups
-          .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
-          .map(g => g.name);
-        
+        // Keep a simple version without group data (groups functionality has been removed)
         return {
-          ...call,
-          groupNames
+          ...call
         };
       });
       
@@ -124,7 +109,7 @@ export default function Home() {
     // Set interval to check every 10 seconds
     const interval = setInterval(checkNotifications, 10000);
     return () => clearInterval(interval);
-  }, [shows, allCalls, allGroups]);
+  }, [shows, allCalls]);
   
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
@@ -153,26 +138,8 @@ export default function Home() {
             // Filter calls for this show
             const calls = allCalls.filter(call => call.showId === show.id);
             
-            // Get relevant groups (includes default groups)
-            const showGroups = allGroups.filter(
-              group => group.isCustom === 0 || group.showId === show.id
-            );
-            
-            // Process calls with numbers and group names
+            // Process calls with numbers and timer information
             const processedCalls: CallWithDetails[] = calls.map((call, idx) => {
-              // Process groupIds from string to array if needed
-              const groupIdsArray = typeof call.groupIds === 'string'
-                ? JSON.parse(call.groupIds as string)
-                : (call.groupIds || []);
-              
-              // Get all group names for this call
-              const groupNames = showGroups
-                .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
-                .map(g => g.name);
-              
-              // Keep groupName for backward compatibility
-              const groupName = groupNames.length > 0 ? groupNames[0] : '';
-              
               // Calculate time remaining for this call
               const showStartTime = new Date(show.startTime);
               const timeRemainingMs = calculateTimeRemaining(showStartTime, call.minutesBefore);
@@ -181,8 +148,6 @@ export default function Home() {
               return {
                 ...call,
                 number: idx + 1,
-                groupName,
-                groupNames,
                 timerString
               };
             }).sort((a, b) => b.minutesBefore - a.minutesBefore);

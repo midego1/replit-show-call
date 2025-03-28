@@ -102,21 +102,19 @@ export function checkAndSendAutoNotifications(
   
   // Send notifications for each call that qualifies
   callsToNotify.forEach(call => {
-    // Parse group IDs
+    // Parse group IDs - groups functionality has been removed but keeping for backward compatibility
     const groupIds = typeof call.groupIds === 'string' 
       ? JSON.parse(call.groupIds) 
       : call.groupIds;
     
-    // Format groups for the notification
-    const groupText = call.groupNames && call.groupNames.length > 0 
-      ? `${call.groupNames.join(', ')} Call`
-      : 'Call';
-      
+    // Send the notification - no group text since groups functionality has been removed
+    const notificationTitle = call.title || 'Call Time';
+    
     // Send the notification
-    sendNotification(`${groupText}: ${call.title || 'Call Time'}`, {
+    sendNotification(notificationTitle, {
       body: call.description 
         ? call.description 
-        : `Time for ${groupText}! Please prepare for the show.`,
+        : `Time for call! Please prepare for the show.`,
       icon: "/favicon.ico"
     });
     
