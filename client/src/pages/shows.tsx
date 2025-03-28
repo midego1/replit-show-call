@@ -198,16 +198,7 @@ export default function Shows() {
             </Card>
           )}
           
-          {!showAddForm && (
-            <Button
-              onClick={() => setShowAddForm(true)}
-              variant="outline"
-              className="w-full mb-2 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add New Show
-            </Button>
-          )}
+          
           
           {processedShows.map(renderShowCard)}
         </div>
