@@ -60,11 +60,12 @@ export function EditShowForm({
         startTime: startTime.toISOString(),
       };
       
-      const response = await apiRequest("PUT", `/api/shows/${show.id}`, data);
+      const response = await apiRequest("PATCH", `/api/shows/${show.id}`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shows"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shows'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/calls'] });
       form.reset();
       onComplete();
     }

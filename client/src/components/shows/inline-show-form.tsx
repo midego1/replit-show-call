@@ -59,7 +59,8 @@ export function InlineShowForm({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shows"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shows'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/calls'] });
       form.reset();
       onComplete();
     }

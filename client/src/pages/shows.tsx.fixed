@@ -99,77 +99,6 @@ export default function Shows() {
     return allCalls.filter(call => call.showId === showId).length;
   };
   
-  // Render a show card
-  const renderShowCard = (show: ShowWithDetails) => {
-    const isEditing = editingShowId === show.id;
-    
-    return (
-      <Card key={show.id} className="shadow-sm">
-        <CardContent 
-          className={`p-4 ${!isEditing ? 'hover:bg-gray-50 transition-colors cursor-pointer' : ''}`} 
-          onClick={() => !isEditing && handleInlineEdit(show)}
-        >
-          {isEditing ? (
-            <EditShowForm 
-              show={show} 
-              onComplete={handleInlineEditComplete}
-              onCancel={handleInlineEditComplete}
-              onDelete={handleInlineDelete}
-            />
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-2 group">
-                <h3 className="text-lg font-medium group-hover:text-primary">{show.name}</h3>
-                <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-gray-500 hover:text-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleInlineEdit(show);
-                    }}
-                    title="Edit show"
-                  >
-                    <Edit2Icon className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-gray-500 hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteShow(show.id, show.name);
-                    }}
-                    disabled={deleteShow.isPending}
-                    title="Delete show"
-                  >
-                    <Trash2Icon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-500 mb-3">{show.description}</p>
-              <div className="flex justify-between text-sm text-gray-500">
-                <div className="flex items-center">
-                  <CalendarIcon className="h-4 w-4 mr-1" />
-                  <span>{show.formattedDate}</span>
-                </div>
-                <div className="flex items-center">
-                  <ClockIcon className="h-4 w-4 mr-1" />
-                  <span>{show.formattedTime}</span>
-                </div>
-                <div className="flex items-center">
-                  <UsersIcon className="h-4 w-4 mr-1" />
-                  <span>{getCallCount(show.id)} calls</span>
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-  
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
       <h2 className="text-xl font-medium mb-6">My Shows</h2>
@@ -209,7 +138,73 @@ export default function Shows() {
             </Button>
           )}
           
-          {processedShows.map(renderShowCard)}
+          {processedShows.map(show => (
+            <Card key={show.id} className="shadow-sm">
+              <CardContent 
+                className={`p-4 ${editingShowId !== show.id ? 'hover:bg-gray-50 transition-colors cursor-pointer' : ''}`} 
+                onClick={() => editingShowId !== show.id && handleInlineEdit(show)}
+              >
+                {editingShowId === show.id ? (
+                  <EditShowForm 
+                    show={show} 
+                    onComplete={handleInlineEditComplete}
+                    onCancel={handleInlineEditComplete}
+                    onDelete={handleInlineDelete}
+                  />
+                ) : (
+                  <>
+                    <div 
+                      className="flex justify-between items-center mb-2 cursor-pointer group"
+                    >
+                      <h3 className="text-lg font-medium group-hover:text-primary">{show.name}</h3>
+                      <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-500 hover:text-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleInlineEdit(show);
+                          }}
+                          title="Edit show"
+                        >
+                          <Edit2Icon className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-gray-500 hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteShow(show.id, show.name);
+                          }}
+                          disabled={deleteShow.isPending}
+                          title="Delete show"
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">{show.description}</p>
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <CalendarIcon className="h-4 w-4 mr-1" />
+                        <span>{show.formattedDate}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <ClockIcon className="h-4 w-4 mr-1" />
+                        <span>{show.formattedTime}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <UsersIcon className="h-4 w-4 mr-1" />
+                        <span>{getCallCount(show.id)} calls</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
       
