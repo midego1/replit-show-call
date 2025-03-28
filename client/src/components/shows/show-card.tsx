@@ -6,7 +6,8 @@ import {
   ChevronUpIcon,
   ClockIcon,
   CalendarIcon,
-  SettingsIcon 
+  SettingsIcon,
+  PlusCircleIcon 
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,17 @@ export function ShowCard({
         <>
           {/* Action Bar */}
           <div className="flex border-t border-b border-gray-200 overflow-x-auto">
+            <Button 
+              variant="ghost" 
+              className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card expansion toggle
+                onAddCall(show.id);
+              }}
+            >
+              <PlusCircleIcon className="w-4 h-4 mr-2" />
+              <span className="text-sm">Add Call</span>
+            </Button>
             <Button variant="ghost" className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50">
               <CalendarIcon className="w-4 h-4 mr-2" />
               <span className="text-sm">Schedule</span>
@@ -55,10 +67,6 @@ export function ShowCard({
             <Button variant="ghost" className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50">
               <UsersIcon className="w-4 h-4 mr-2" />
               <span className="text-sm">Calibre</span>
-            </Button>
-            <Button variant="ghost" className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50">
-              <BarChartIcon className="w-4 h-4 mr-2" />
-              <span className="text-sm">Analytics</span>
             </Button>
             <Button variant="ghost" className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50">
               <FileTextIcon className="w-4 h-4 mr-2" />
