@@ -102,15 +102,8 @@ export function checkAndSendAutoNotifications(
   
   // Send notifications for each call that qualifies
   callsToNotify.forEach(call => {
-    // Parse group IDs - groups functionality has been removed but keeping for backward compatibility
-    const groupIds = typeof call.groupIds === 'string' 
-      ? JSON.parse(call.groupIds) 
-      : call.groupIds;
-    
-    // Send the notification - no group text since groups functionality has been removed
+    // Prepare notification content
     const notificationTitle = call.title || 'Call Time';
-    
-    // Send the notification
     sendNotification(notificationTitle, {
       body: call.description 
         ? call.description 

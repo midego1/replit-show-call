@@ -61,10 +61,9 @@ export function CallItem({ call, number }: CallItemProps) {
                   {call.sendNotification === 1 && (
                     <span
                       className="inline-flex items-center ml-2 text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary"
-                      title="Auto-notification enabled"
+                      title="Notification enabled"
                     >
-                      <BellIcon className="h-3 w-3 mr-0.5" />
-                      Auto
+                      <BellIcon className="h-3 w-3" />
                     </span>
                   )}
                 </span>
