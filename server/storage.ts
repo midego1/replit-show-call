@@ -246,9 +246,7 @@ export class MemStorage implements IStorage {
       ...insertCall,
       title: insertCall.title || 'Untitled Call',  // Default title if none provided
       description: insertCall.description || null, // Make sure description is null if not provided
-      groupIds: Array.isArray(insertCall.groupIds) 
-        ? JSON.stringify(insertCall.groupIds) 
-        : insertCall.groupIds
+      // groupIds is already handled by the schema transformation
     };
     
     const call: Call = { 
@@ -276,17 +274,13 @@ export class MemStorage implements IStorage {
       // Handle description updates properly
       description: updates.description !== undefined ? updates.description || null : call.description,
       
-      // Handle groupIds update
-      groupIds: updates.groupIds !== undefined 
-        ? (Array.isArray(updates.groupIds) 
-          ? JSON.stringify(updates.groupIds) 
-          : updates.groupIds)
-        : call.groupIds,
-          
       // Include other possible updates  
       title: updates.title !== undefined ? updates.title : call.title,
       minutesBefore: updates.minutesBefore !== undefined ? updates.minutesBefore : call.minutesBefore,
-      showId: updates.showId !== undefined ? updates.showId : call.showId
+      showId: updates.showId !== undefined ? updates.showId : call.showId,
+      
+      // groupIds is already transformed by the schema if it's an array
+      groupIds: updates.groupIds !== undefined ? updates.groupIds : call.groupIds
     };
 
     const updatedCall: Call = {

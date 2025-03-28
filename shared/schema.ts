@@ -57,8 +57,18 @@ export const calls = pgTable("calls", {
   showId: integer("show_id").notNull(),
 });
 
-export const insertCallSchema = createInsertSchema(calls).omit({
+// Create a base schema from the table schema
+const baseCallSchema = createInsertSchema(calls).omit({
   id: true,
+});
+
+// Extend it with our custom validation for groupIds
+export const insertCallSchema = baseCallSchema.extend({
+  // Accept an array of numbers but transform it to a string when validating
+  groupIds: z.union([
+    z.array(z.number()).transform(arr => JSON.stringify(arr)),
+    z.string()
+  ]),
 });
 
 export type InsertCall = z.infer<typeof insertCallSchema>;
