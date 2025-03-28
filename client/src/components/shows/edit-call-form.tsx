@@ -98,130 +98,123 @@ export function EditCallForm({
   
   return (
     <div className="p-4 bg-gray-50 border-b border-gray-200">
-      <div className="flex items-start">
-        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white font-medium mr-3 mt-1">
-          <SaveIcon className="h-4 w-4" />
-        </div>
-        <div className="flex-grow">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium">Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Cast Call" {...field} className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="minutesBefore"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-medium">Minutes Before Show</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min={1} 
-                          max={180} 
-                          placeholder="30" 
-                          {...field} 
-                          className="h-9"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-medium">Description (optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Additional details" {...field} className="h-9" />
-                    </FormControl>
-                    <FormMessage className="text-xs" />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="sendNotification"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                    <div>
-                      <FormLabel className="text-xs font-medium">Send Notification</FormLabel>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={updateCall.isPending}
-                        aria-readonly={updateCall.isPending}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              {/* Action buttons - matches show form styling */}
-              <div className="flex justify-between pt-2">
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => deleteCall.mutate()}
-                  disabled={deleteCall.isPending || updateCall.isPending}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 text-xs"
-                >
-                  <Trash2Icon className="h-3 w-3 mr-1" />
-                  Delete
-                </Button>
-                
-                <div className="flex space-x-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm"
-                    onClick={onCancel}
-                    disabled={updateCall.isPending || deleteCall.isPending}
-                    className="h-8 text-xs"
-                  >
-                    <XIcon className="h-3 w-3 mr-1" />
-                    Cancel
-                  </Button>
-                  
-                  <Button 
-                    type="submit" 
-                    size="sm"
-                    disabled={updateCall.isPending || deleteCall.isPending}
-                    className="h-8 text-xs"
-                  >
-                    {updateCall.isPending ? "Saving..." : (
-                      <>
-                        <SaveIcon className="h-3 w-3 mr-1" />
-                        Save
-                      </>
-                    )}
-                  </Button>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-medium">Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Cast Call" {...field} className="h-9" />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="minutesBefore"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-medium">Minutes Before Show</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min={1} 
+                      max={180} 
+                      placeholder="30" 
+                      {...field} 
+                      className="h-9"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium">Description (optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Additional details" {...field} className="h-9" />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="sendNotification"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div>
+                  <FormLabel className="text-xs font-medium">Send Notification</FormLabel>
                 </div>
-              </div>
-            </form>
-          </Form>
-        </div>
-      </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={updateCall.isPending}
+                    aria-readonly={updateCall.isPending}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          
+          {/* Action buttons - matches show form styling */}
+          <div className="flex justify-between pt-2">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="sm"
+              onClick={() => deleteCall.mutate()}
+              disabled={deleteCall.isPending || updateCall.isPending}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 text-xs"
+            >
+              <Trash2Icon className="h-3 w-3 mr-1" />
+              Delete
+            </Button>
+            
+            <div className="flex space-x-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={onCancel}
+                disabled={updateCall.isPending || deleteCall.isPending}
+                className="h-8 text-xs"
+              >
+                <XIcon className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+              
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={updateCall.isPending || deleteCall.isPending}
+                className="h-8 text-xs"
+              >
+                {updateCall.isPending ? "Saving..." : (
+                  <>
+                    <SaveIcon className="h-3 w-3 mr-1" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
