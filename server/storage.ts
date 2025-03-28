@@ -106,7 +106,13 @@ export class MemStorage implements IStorage {
 
   async createShow(insertShow: InsertShow): Promise<Show> {
     const id = this.showId++;
-    const show: Show = { ...insertShow, id };
+    // Make sure description is null if undefined
+    const description = insertShow.description === undefined ? null : insertShow.description;
+    const show: Show = { 
+      ...insertShow, 
+      id,
+      description 
+    };
     this.shows.set(id, show);
     return show;
   }
@@ -159,7 +165,13 @@ export class MemStorage implements IStorage {
 
   async createGroup(insertGroup: InsertGroup): Promise<Group> {
     const id = this.groupId++;
-    const group: Group = { ...insertGroup, id };
+    // Make sure showId is null if undefined
+    const showId = insertGroup.showId === undefined ? null : insertGroup.showId;
+    const group: Group = { 
+      ...insertGroup, 
+      id,
+      showId
+    };
     this.groups.set(id, group);
     return group;
   }

@@ -28,7 +28,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/shows", async (req, res) => {
     try {
       const userId = 1; // Default user ID
-      const showData = insertShowSchema.parse({ ...req.body, userId });
+      
+      // Parse the startTime string to Date if it's a string
+      let formData = { ...req.body, userId };
+      if (typeof formData.startTime === 'string') {
+        formData.startTime = new Date(formData.startTime);
+      }
+      
+      const showData = insertShowSchema.parse(formData);
       const show = await storage.createShow(showData);
       res.status(201).json(show);
     } catch (error) {
