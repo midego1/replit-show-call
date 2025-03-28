@@ -1,20 +1,58 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Group } from "@shared/schema";
+import { Group, Show, insertGroupSchema } from "@shared/schema";
 import { GroupWithDetails } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, Edit2Icon, Trash2Icon } from "lucide-react";
+import { PlusIcon, Edit2Icon, Trash2Icon, CheckIcon, PlusCircleIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+// Form schema for creating a custom group
+const createGroupSchema = insertGroupSchema.extend({
+  showId: z.number().nullable().optional(),
+});
+
+type CreateGroupValues = z.infer<typeof createGroupSchema>;
 
 export default function Groups() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [addGroupDialogOpen, setAddGroupDialogOpen] = useState(false);
+  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
+  const [addToShowDialogOpen, setAddToShowDialogOpen] = useState(false);
+  const [groupToAddToShow, setGroupToAddToShow] = useState<Group | null>(null);
   
   // Fetch groups
   const { data: allGroups = [] } = useQuery<Group[]>({
     queryKey: ['/api/groups'],
+  });
+  
+  // Fetch shows
+  const { data: shows = [] } = useQuery<Show[]>({
+    queryKey: ['/api/shows'],
   });
   
   // Process groups
@@ -23,19 +61,107 @@ export default function Groups() {
     .map(group => {
       let icon;
       switch (group.name) {
-        case "All": icon = "group"; break;
         case "Cast": icon = "person"; break;
         case "Crew": icon = "tools"; break;
-        case "Staff": icon = "briefcase"; break;
-        case "Guests": icon = "gift"; break;
         default: icon = "users";
       }
       return { ...group, icon };
     });
   
   const customGroups: GroupWithDetails[] = allGroups
-    .filter(group => group.isCustom === 1)
+    .filter(group => group.isCustom === 1 && !group.showId)
     .map(group => ({ ...group, icon: "tag" }));
+  
+  // Group by show
+  const showGroups: Record<number, GroupWithDetails[]> = {};
+  
+  allGroups.filter(group => group.isCustom === 1 && group.showId)
+    .forEach(group => {
+      const showId = group.showId!;
+      if (!showGroups[showId]) {
+        showGroups[showId] = [];
+      }
+      showGroups[showId].push({ ...group, icon: "tag" });
+    });
+  
+  // Form for creating a new custom group
+  const form = useForm<CreateGroupValues>({
+    resolver: zodResolver(createGroupSchema),
+    defaultValues: {
+      name: '',
+      isCustom: 1,
+      showId: null,
+    },
+  });
+  
+  // Create group mutation
+  const createGroup = useMutation({
+    mutationFn: async (values: CreateGroupValues) => {
+      // If selectedShowId is set, assign this group to that show
+      if (selectedShowId) {
+        values.showId = selectedShowId;
+      }
+      const response = await apiRequest("POST", "/api/groups", values);
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shows'] });
+      if (selectedShowId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/shows', selectedShowId, 'groups'] });
+      }
+      setAddGroupDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Group created",
+        description: "The group has been successfully created."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create group: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Add existing group to show mutation
+  const addGroupToShow = useMutation({
+    mutationFn: async ({ groupId, showId }: { groupId: number, showId: number }) => {
+      // Create a copy of the group with the showId
+      const group = allGroups.find(g => g.id === groupId);
+      if (!group) throw new Error("Group not found");
+      
+      const newGroup = {
+        name: group.name,
+        isCustom: 1,
+        showId: showId
+      };
+      
+      const response = await apiRequest("POST", "/api/groups", newGroup);
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+      if (selectedShowId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/shows', selectedShowId, 'groups'] });
+      }
+      setAddToShowDialogOpen(false);
+      setGroupToAddToShow(null);
+      toast({
+        title: "Group added to show",
+        description: "The group has been successfully added to the show."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to add group to show: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
   
   // Delete group mutation
   const deleteGroup = useMutation({
@@ -64,6 +190,24 @@ export default function Groups() {
     }
   };
   
+  const onSubmit = (values: CreateGroupValues) => {
+    createGroup.mutate(values);
+  };
+
+  const handleAddToShow = (group: Group) => {
+    setGroupToAddToShow(group);
+    setAddToShowDialogOpen(true);
+  };
+  
+  const confirmAddToShow = () => {
+    if (groupToAddToShow && selectedShowId) {
+      addGroupToShow.mutate({ 
+        groupId: groupToAddToShow.id, 
+        showId: selectedShowId 
+      });
+    }
+  };
+  
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
       <h2 className="text-xl font-medium mb-6">Groups</h2>
@@ -76,19 +220,35 @@ export default function Groups() {
           <ul className="divide-y divide-gray-200">
             {defaultGroups.map(group => (
               <li key={group.id} className="flex items-center px-4 py-3">
-                <GroupIcon name={group.icon} className="mr-3 text-primary h-5 w-5" />
+                <GroupIcon name={group.icon || "users"} className="mr-3 text-primary h-5 w-5" />
                 <span className="flex-grow">{group.name}</span>
-                <span className="text-sm text-gray-500">System</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={() => handleAddToShow(group)}
+                >
+                  <PlusCircleIcon className="h-4 w-4 mr-1" />
+                  Add to show
+                </Button>
               </li>
             ))}
           </ul>
         </CardContent>
       </Card>
       
-      <Card className="shadow-sm overflow-hidden">
+      <Card className="mb-6 shadow-sm overflow-hidden">
         <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
           <h3 className="font-medium">Custom Groups</h3>
-          <Button variant="ghost" size="icon" className="text-primary">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-primary"
+            onClick={() => {
+              setSelectedShowId(null);
+              setAddGroupDialogOpen(true);
+            }}
+          >
             <PlusIcon className="h-5 w-5" />
           </Button>
         </CardHeader>
@@ -97,11 +257,17 @@ export default function Groups() {
             <ul className="divide-y divide-gray-200">
               {customGroups.map(group => (
                 <li key={group.id} className="flex items-center px-4 py-3">
-                  <GroupIcon name={group.icon} className="mr-3 text-secondary h-5 w-5" />
+                  <GroupIcon name={group.icon || "users"} className="mr-3 text-secondary h-5 w-5" />
                   <span className="flex-grow">{group.name}</span>
                   <div className="flex space-x-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-primary">
-                      <Edit2Icon className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary"
+                      onClick={() => handleAddToShow(group)}
+                    >
+                      <PlusCircleIcon className="h-4 w-4 mr-1" />
+                      Add to show
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -122,6 +288,10 @@ export default function Groups() {
               <Button 
                 variant="link" 
                 className="text-primary mt-2"
+                onClick={() => {
+                  setSelectedShowId(null);
+                  setAddGroupDialogOpen(true);
+                }}
               >
                 Create custom group
               </Button>
@@ -129,6 +299,154 @@ export default function Groups() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Show-specific groups */}
+      {shows.length > 0 && (
+        <div className="space-y-6">
+          {shows.map(show => (
+            <Card key={show.id} className="shadow-sm overflow-hidden">
+              <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="font-medium">Groups for '{show.name}'</h3>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-primary"
+                  onClick={() => {
+                    setSelectedShowId(show.id);
+                    setAddGroupDialogOpen(true);
+                  }}
+                >
+                  <PlusIcon className="h-5 w-5" />
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                {showGroups[show.id] && showGroups[show.id].length > 0 ? (
+                  <ul className="divide-y divide-gray-200">
+                    {showGroups[show.id].map(group => (
+                      <li key={group.id} className="flex items-center px-4 py-3">
+                        <GroupIcon name={group.icon || "users"} className="mr-3 text-secondary h-5 w-5" />
+                        <span className="flex-grow">{group.name}</span>
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-gray-500 hover:text-destructive"
+                            onClick={() => handleDeleteGroup(group.id, group.name)}
+                            disabled={deleteGroup.isPending}
+                          >
+                            <Trash2Icon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="py-6 text-center text-gray-500">
+                    <p>No groups for this show yet</p>
+                    <Button 
+                      variant="link" 
+                      className="text-primary mt-2"
+                      onClick={() => {
+                        setSelectedShowId(show.id);
+                        setAddGroupDialogOpen(true);
+                      }}
+                    >
+                      Add a group
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      
+      {/* Create Group Dialog */}
+      <Dialog open={addGroupDialogOpen} onOpenChange={setAddGroupDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Group</DialogTitle>
+            <DialogDescription>
+              {selectedShowId 
+                ? `Add a custom group to ${shows.find(s => s.id === selectedShowId)?.name}`
+                : "Create a new custom group that can be used across shows"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Group Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter group name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline" type="button">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" disabled={createGroup.isPending}>
+                  {createGroup.isPending && <span className="animate-spin mr-2">•</span>}
+                  Create Group
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add to Show Dialog */}
+      <Dialog open={addToShowDialogOpen} onOpenChange={setAddToShowDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Group to Show</DialogTitle>
+            <DialogDescription>
+              Add "{groupToAddToShow?.name}" to a show
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Label htmlFor="showSelect">Select Show</Label>
+            <Select 
+              value={selectedShowId?.toString() || ""} 
+              onValueChange={(value) => setSelectedShowId(parseInt(value))}
+            >
+              <SelectTrigger id="showSelect" className="w-full">
+                <SelectValue placeholder="Select a show" />
+              </SelectTrigger>
+              <SelectContent>
+                {shows.map(show => (
+                  <SelectItem key={show.id} value={show.id.toString()}>
+                    {show.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" type="button">Cancel</Button>
+            </DialogClose>
+            <Button 
+              onClick={confirmAddToShow} 
+              disabled={!selectedShowId || addGroupToShow.isPending}
+            >
+              {addGroupToShow.isPending && <span className="animate-spin mr-2">•</span>}
+              Add to Show
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

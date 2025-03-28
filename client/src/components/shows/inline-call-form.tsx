@@ -41,10 +41,19 @@ export function InlineCallForm({
 }: InlineCallFormProps) {
   const queryClient = useQueryClient();
   
-  const { data: groups = [] } = useQuery<Group[]>({
-    queryKey: [`/api/shows/${showId}/groups`],
+  // Get both default groups and show-specific groups
+  const { data: defaultGroups = [] } = useQuery<Group[]>({
+    queryKey: ["/api/groups"],
     enabled: !!showId
   });
+  
+  const { data: showGroups = [] } = useQuery<Group[]>({
+    queryKey: showId ? ["/api/shows", showId, "groups"] : [],
+    enabled: !!showId
+  });
+  
+  // Combine both lists to show all available groups for this show
+  const groups = [...defaultGroups, ...showGroups];
   
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),

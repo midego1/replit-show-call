@@ -149,6 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ message: "Show not found" });
     }
     
+    // Only get groups that are specific to this show
     const groups = await storage.getGroupsForShow(showId);
     res.json(groups);
   });
@@ -177,9 +178,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/groups/:id", async (req, res) => {
+  app.put("/api/groups/:id", isAuthenticated, async (req, res) => {
     try {
       const groupId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Get the group to check if it's show-specific
+      const existingGroup = await storage.getGroup(groupId);
+      if (!existingGroup) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      
+      // If it's a show-specific group, verify the user owns the show
+      if (existingGroup.showId) {
+        const show = await storage.getShow(existingGroup.showId);
+        if (!show || show.userId !== userId) {
+          return res.status(403).json({ message: "Unauthorized" });
+        }
+      }
+      
+      // System default groups cannot be modified
+      if (existingGroup.isCustom === 0) {
+        return res.status(403).json({ message: "Cannot modify system groups" });
+      }
+      
       const groupData = insertGroupSchema.partial().parse(req.body);
       const group = await storage.updateGroup(groupId, groupData);
       if (!group) {
@@ -194,8 +216,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/groups/:id", async (req, res) => {
+  app.delete("/api/groups/:id", isAuthenticated, async (req, res) => {
     const groupId = parseInt(req.params.id);
+    const userId = req.user!.id;
+    
+    // Get the group to check if it's show-specific
+    const group = await storage.getGroup(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    
+    // If it's a show-specific group, verify the user owns the show
+    if (group.showId) {
+      const show = await storage.getShow(group.showId);
+      if (!show || show.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+    }
+    
+    // System default groups cannot be deleted
+    if (group.isCustom === 0) {
+      return res.status(403).json({ message: "Cannot delete system groups" });
+    }
+    
     const deleted = await storage.deleteGroup(groupId);
     if (!deleted) {
       return res.status(404).json({ message: "Group not found or cannot be deleted" });

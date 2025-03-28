@@ -43,10 +43,19 @@ export function CreateCallDialog({
   const queryClient = useQueryClient();
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
   
-  const { data: groups = [] } = useQuery<Group[]>({
-    queryKey: showId ? [`/api/shows/${showId}/groups`] : ["/api/groups"],
+  // Get both default groups and show-specific groups
+  const { data: defaultGroups = [] } = useQuery<Group[]>({
+    queryKey: ["/api/groups"],
     enabled: open && showId !== null
   });
+  
+  const { data: showGroups = [] } = useQuery<Group[]>({
+    queryKey: showId ? ["/api/shows", showId, "groups"] : [],
+    enabled: open && showId !== null
+  });
+  
+  // Combine both lists to show all available groups for this show
+  const groups = [...defaultGroups, ...showGroups];
   
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),

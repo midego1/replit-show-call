@@ -44,10 +44,19 @@ export function EditCallForm({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const { data: groups = [] } = useQuery<Group[]>({
-    queryKey: [`/api/shows/${call.showId}/groups`],
+  // Get both default groups and show-specific groups
+  const { data: defaultGroups = [] } = useQuery<Group[]>({
+    queryKey: ["/api/groups"],
     enabled: !!call.showId
   });
+  
+  const { data: showGroups = [] } = useQuery<Group[]>({
+    queryKey: call.showId ? ["/api/shows", call.showId, "groups"] : [],
+    enabled: !!call.showId
+  });
+  
+  // Combine both lists to show all available groups for this show
+  const groups = [...defaultGroups, ...showGroups];
   
   // Parse groupIds from string if needed
   const initialGroupIds = typeof call.groupIds === 'string'
