@@ -6,7 +6,8 @@ import { insertCallSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group, Call } from "@shared/schema";
@@ -29,7 +30,8 @@ const editCallSchema = z.object({
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
   groupIds: z.array(z.number()).min(1, "Please select at least one group"),
-  showId: z.coerce.number()
+  showId: z.coerce.number(),
+  sendNotification: z.boolean().default(false)
 });
 
 type EditCallFormValues = z.infer<typeof editCallSchema>;
@@ -68,7 +70,8 @@ export function EditCallForm({
       description: call.description || "",
       minutesBefore: call.minutesBefore,
       groupIds: initialGroupIds,
-      showId: call.showId
+      showId: call.showId,
+      sendNotification: call.sendNotification === 1
     }
   });
   
@@ -257,6 +260,29 @@ export function EditCallForm({
                       })}
                     </div>
                     <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="sendNotification"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-xs font-medium">Auto Notifications</FormLabel>
+                      <FormDescription className="text-xs text-muted-foreground">
+                        Send notification automatically when call time is reached
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={updateCall.isPending}
+                        aria-readonly={updateCall.isPending}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

@@ -3,7 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { ShowCard } from "@/components/shows/show-card";
 import { Show, Call, Group } from "@shared/schema";
 import { ShowWithDetails, CallWithDetails } from "@/lib/types";
-import { formatTimeRemaining, formatShowDate, formatTimerString, calculateTimeRemaining, sendNotification } from "@/lib/utils";
+import { 
+  formatTimeRemaining, 
+  formatShowDate, 
+  formatTimerString, 
+  calculateTimeRemaining, 
+  sendNotification,
+  checkAndSendAutoNotifications,
+  requestNotificationPermission
+} from "@/lib/utils";
 
 export default function Home() {
   const [expandedShowId, setExpandedShowId] = useState<number | null>(null);
@@ -55,57 +63,62 @@ export default function Home() {
     }
   }, [processedShows, expandedShowId]);
   
-  // Check for calls that need notifications
+  // Request notification permissions when component mounts
+  useEffect(() => {
+    // Request permission silently on component mount
+    requestNotificationPermission().catch(() => {
+      // Handle error silently
+    });
+  }, []);
+  
+  // Check for calls that need auto-notifications
   useEffect(() => {
     if (!shows.length || !allCalls.length || !allGroups.length) return;
     
-    const checkCallTimes = () => {
-      shows.forEach(show => {
-        const showStartTime = new Date(show.startTime);
-        const calls = allCalls.filter(call => call.showId === show.id);
+    const checkNotifications = () => {
+      // First, enrich calls with group names for notification messages
+      const processedCalls = allCalls.map(call => {
+        // Find the show this call belongs to
+        const show = shows.find(s => s.id === call.showId);
+        if (!show) return call;
         
-        calls.forEach(call => {
-          // Skip if we've already notified for this call
-          if (notifiedCallsRef.current.has(call.id)) return;
-          
-          const timeRemainingMs = calculateTimeRemaining(showStartTime, call.minutesBefore);
-          
-          // If time is up and we haven't notified yet
-          if (timeRemainingMs <= 0) {
-            // Get group names for this call
-            const groupIdsArray = typeof call.groupIds === 'string'
-              ? JSON.parse(call.groupIds as string)
-              : (call.groupIds || []);
-            
-            const relevantGroups = allGroups.filter(
-              group => (group.isCustom === 0 || group.showId === show.id)
-            );
-            
-            const groupNames = relevantGroups
-              .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
-              .map(g => g.name);
-            
-            const groupText = groupNames.length > 0 
-              ? `${groupNames.join(', ')} Call`
-              : 'Call';
-              
-            sendNotification(`${groupText}: ${call.title || 'Call Time'}`, {
-              body: call.description ? call.description : "Time to prepare! Your call is now.",
-              icon: "/favicon.ico"
-            });
-            
-            // Mark as notified
-            notifiedCallsRef.current.add(call.id);
-          }
-        });
+        // Process groupIds from string to array if needed
+        const groupIdsArray = typeof call.groupIds === 'string'
+          ? JSON.parse(call.groupIds as string)
+          : (call.groupIds || []);
+        
+        // Get relevant groups for this show
+        const relevantGroups = allGroups.filter(
+          group => (group.isCustom === 0 || group.showId === show.id)
+        );
+        
+        // Get group names for this call
+        const groupNames = relevantGroups
+          .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
+          .map(g => g.name);
+        
+        return {
+          ...call,
+          groupNames
+        };
       });
+      
+      // Use our utility function to check and send notifications
+      checkAndSendAutoNotifications(
+        processedCalls,
+        shows,
+        notifiedCallsRef.current,
+        (newSet) => {
+          notifiedCallsRef.current = newSet;
+        }
+      );
     };
     
     // Check immediately
-    checkCallTimes();
+    checkNotifications();
     
-    // Set interval to check every 5 seconds
-    const interval = setInterval(checkCallTimes, 5000);
+    // Set interval to check every 10 seconds
+    const interval = setInterval(checkNotifications, 10000);
     return () => clearInterval(interval);
   }, [shows, allCalls, allGroups]);
   

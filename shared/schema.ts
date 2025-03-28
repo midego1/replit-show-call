@@ -55,6 +55,7 @@ export const calls = pgTable("calls", {
   minutesBefore: integer("minutes_before").notNull(),
   groupIds: text("group_ids").notNull(), // Storing JSON array of group IDs as string
   showId: integer("show_id").notNull(),
+  sendNotification: integer("send_notification").default(0).notNull(), // Boolean flag for auto-notification
 });
 
 // Create a base schema from the table schema
@@ -69,6 +70,10 @@ export const insertCallSchema = baseCallSchema.extend({
     z.array(z.number()).transform(arr => JSON.stringify(arr)),
     z.string()
   ]),
+  sendNotification: z.union([
+    z.boolean().transform(val => val ? 1 : 0),
+    z.number().int().min(0).max(1)
+  ]).default(0),
 });
 
 export type InsertCall = z.infer<typeof insertCallSchema>;

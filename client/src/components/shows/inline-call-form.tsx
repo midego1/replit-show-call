@@ -4,11 +4,12 @@ import { z } from "zod";
 import { insertCallSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group } from "@shared/schema";
-import { XIcon, SaveIcon, UsersIcon } from "lucide-react";
+import { XIcon, SaveIcon, UsersIcon, BellIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 // Extend the insertCallSchema with client-side validation
@@ -21,7 +22,8 @@ const createCallSchema = z.object({
     .max(180, "Must be at most 180 minutes"),
   // Array of groupIds
   groupIds: z.array(z.number()).min(1, "Please select at least one group"),
-  showId: z.coerce.number()
+  showId: z.coerce.number(),
+  sendNotification: z.boolean().default(false)
 });
 
 type CreateCallFormValues = z.infer<typeof createCallSchema>;
@@ -51,7 +53,8 @@ export function InlineCallForm({
       description: "",
       minutesBefore: 30,
       groupIds: groups.length > 0 ? [groups[0].id] : [],
-      showId: showId
+      showId: showId,
+      sendNotification: false
     }
   });
   
@@ -162,6 +165,32 @@ export function InlineCallForm({
                   </div>
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="sendNotification"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel className="flex items-center text-sm font-medium">
+                    <BellIcon className="h-4 w-4 mr-1" />
+                    Auto Notifications
+                  </FormLabel>
+                  <FormDescription className="text-xs text-muted-foreground">
+                    Send notification automatically when call time is reached
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={createCall.isPending}
+                    aria-readonly={createCall.isPending}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />

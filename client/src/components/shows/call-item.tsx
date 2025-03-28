@@ -114,7 +114,18 @@ export function CallItem({ call, number }: CallItemProps) {
           <div className="flex-grow">
             <div className="flex flex-col">
               <div className="flex items-center">
-                <span className="text-gray-900 font-medium">{call.title || 'Untitled Call'}</span>
+                <span className="text-gray-900 font-medium">
+                  {call.title || 'Untitled Call'}
+                  {call.sendNotification === 1 && (
+                    <span
+                      className="inline-flex items-center ml-2 text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary"
+                      title="Auto-notification enabled"
+                    >
+                      <BellIcon className="h-3 w-3 mr-0.5" />
+                      Auto
+                    </span>
+                  )}
+                </span>
                 <div className="flex flex-wrap gap-1 ml-2">
                   {call.groupNames && call.groupNames.map((groupName, idx) => (
                     <span 

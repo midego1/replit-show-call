@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group } from "@shared/schema";
@@ -21,7 +22,8 @@ const createCallSchema = z.object({
     .min(1, "Must be at least 1 minute")
     .max(180, "Must be at most 180 minutes"),
   groupIds: z.array(z.number()).min(1, "Please select at least one group"),
-  showId: z.coerce.number()
+  showId: z.coerce.number(),
+  sendNotification: z.boolean().default(false)
 });
 
 type CreateCallFormValues = z.infer<typeof createCallSchema>;
@@ -52,14 +54,16 @@ export function CreateCallDialog({
       description: "",
       minutesBefore: 30,
       groupIds: [],
-      showId: showId || 0
+      showId: showId || 0,
+      sendNotification: false
     },
     values: {
       title: "",
       description: "",
       minutesBefore: 30,
       groupIds: selectedGroups,
-      showId: showId || 0
+      showId: showId || 0,
+      sendNotification: false
     }
   });
   
@@ -171,6 +175,29 @@ export function CreateCallDialog({
                     ))}
                   </div>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="sendNotification"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Auto Notifications</FormLabel>
+                    <FormDescription>
+                      Send notification automatically when call time is reached
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={createCall.isPending}
+                      aria-readonly={createCall.isPending}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
