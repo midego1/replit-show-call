@@ -124,6 +124,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Calls routes
+  app.get("/api/calls", async (req, res) => {
+    // Get all calls for all shows
+    const shows = await storage.getShowsForUser(1); // Default user ID
+    let allCalls: Call[] = [];
+    
+    // Collect calls for each show
+    for (const show of shows) {
+      const calls = await storage.getCallsForShow(show.id);
+      allCalls = [...allCalls, ...calls];
+    }
+    
+    res.json(allCalls);
+  });
+  
   app.get("/api/shows/:showId/calls", async (req, res) => {
     const showId = parseInt(req.params.showId);
     const calls = await storage.getCallsForShow(showId);

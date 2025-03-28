@@ -21,20 +21,16 @@ export default function Home() {
     queryKey: ['/api/shows'],
   });
   
-  // Map calls to shows
-  const callQueries = shows.map(show => {
-    return useQuery<Call[]>({
-      queryKey: [`/api/shows/${show.id}/calls`],
-      enabled: !!show.id
-    });
+  // Fetch all calls in a single query
+  const { data: allCalls = [] } = useQuery<Call[]>({
+    queryKey: ['/api/calls'],
+    enabled: shows.length > 0,
   });
   
-  // Map groups to shows
-  const groupQueries = shows.map(show => {
-    return useQuery<Group[]>({
-      queryKey: [`/api/shows/${show.id}/groups`],
-      enabled: !!show.id
-    });
+  // Fetch all groups in a single query
+  const { data: allGroups = [] } = useQuery<Group[]>({
+    queryKey: ['/api/groups'],
+    enabled: shows.length > 0,
   });
   
   // Process shows with their time remaining
@@ -94,16 +90,18 @@ export default function Home() {
         </div>
       ) : (
         <div className="space-y-6">
-          {processedShows.map((show, index) => {
-            const callsQuery = callQueries[index];
-            const groupsQuery = groupQueries[index];
+          {processedShows.map((show) => {
+            // Filter calls for this show
+            const calls = allCalls.filter(call => call.showId === show.id);
             
-            const calls = callsQuery.data || [];
-            const groups = groupsQuery.data || [];
+            // Get relevant groups (includes default groups)
+            const showGroups = allGroups.filter(
+              group => group.isCustom === 0 || group.showId === show.id
+            );
             
-            // Process calls with numbers and calculated time remaining
+            // Process calls with numbers and group names
             const processedCalls: CallWithDetails[] = calls.map((call, idx) => {
-              const groupName = groups.find(g => g.id === call.groupId)?.name;
+              const groupName = showGroups.find(g => g.id === call.groupId)?.name;
               
               return {
                 ...call,
@@ -117,7 +115,7 @@ export default function Home() {
                 key={show.id}
                 show={show}
                 calls={processedCalls}
-                groups={groups}
+                groups={showGroups}
                 expanded={expandedShowId === show.id}
                 onToggleExpand={handleToggleExpand}
                 onAddCall={handleAddCall}
