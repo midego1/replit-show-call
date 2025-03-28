@@ -58,6 +58,9 @@ export function CallItem({ call, number }: CallItemProps) {
           call={call}
           onComplete={handleEditComplete}
           onCancel={handleEditCancel}
+          onDelete={(id) => {
+            deleteMutation.mutate();
+          }}
         />
       ) : (
         <div 
@@ -90,21 +93,6 @@ export function CallItem({ call, number }: CallItemProps) {
           </div>
           
           <div className="flex items-center">
-            <div className="flex space-x-1 mr-3">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 text-red-500 hover:bg-red-50 opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(e);
-                }}
-                title="Delete call"
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </Button>
-            </div>
-            
             <div className="text-right whitespace-nowrap">
               {call.timerString ? (
                 call.timerString === "00:00" ? (

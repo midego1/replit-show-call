@@ -176,20 +176,26 @@ export function CreateCallDialog({
             />
             
             <DialogFooter className="pt-4 border-t">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={() => onOpenChange(false)}
-                disabled={createCall.isPending}
+              <div
+                className="touch-manipulation"
+                onClick={() => !createCall.isPending && onOpenChange(false)}
               >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createCall.isPending || !showId}
-              >
-                {createCall.isPending ? "Adding..." : "Add Call"}
-              </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  disabled={createCall.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+              <div className="touch-manipulation">
+                <Button 
+                  type="submit" 
+                  disabled={createCall.isPending || !showId}
+                >
+                  {createCall.isPending ? "Adding..." : "Add Call"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

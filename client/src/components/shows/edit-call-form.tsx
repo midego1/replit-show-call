@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group, Call } from "@shared/schema";
-import { SaveIcon, XIcon } from "lucide-react";
+import { SaveIcon, XIcon, Trash2Icon } from "lucide-react";
 
 // Extend the insertCallSchema with client-side validation
 const editCallSchema = z.object({
@@ -29,12 +29,14 @@ interface EditCallFormProps {
   call: Call;
   onComplete: () => void;
   onCancel: () => void;
+  onDelete?: (id: number) => void;
 }
 
 export function EditCallForm({
   call,
   onComplete,
-  onCancel
+  onCancel,
+  onDelete
 }: EditCallFormProps) {
   const queryClient = useQueryClient();
   
@@ -76,6 +78,22 @@ export function EditCallForm({
   const onSubmit = (values: EditCallFormValues) => {
     updateCall.mutate(values);
   };
+  
+  const deleteCall = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/calls/${call.id}`);
+      return response.ok;
+    },
+    onSuccess: () => {
+      // Invalidate both specific show calls and all calls
+      queryClient.invalidateQueries({ queryKey: [`/api/shows/${call.showId}/calls`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/calls'] });
+      onComplete();
+      if (onDelete) {
+        onDelete(call.id);
+      }
+    }
+  });
   
   // Toggle group selection
   const toggleGroup = (groupId: number) => {
@@ -176,31 +194,45 @@ export function EditCallForm({
                 )}
               />
               
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex justify-between pt-2">
                 <Button 
                   type="button" 
-                  variant="outline" 
+                  variant="ghost" 
                   size="sm"
-                  onClick={onCancel}
-                  disabled={updateCall.isPending}
-                  className="h-8 text-xs"
+                  onClick={() => deleteCall.mutate()}
+                  disabled={deleteCall.isPending || updateCall.isPending}
+                  className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
-                  <XIcon className="h-3 w-3 mr-1" />
-                  Cancel
+                  <Trash2Icon className="h-3 w-3 mr-1" />
+                  Delete
                 </Button>
-                <Button 
-                  type="submit" 
-                  size="sm"
-                  disabled={updateCall.isPending}
-                  className="h-8 text-xs"
-                >
-                  {updateCall.isPending ? "Saving..." : (
-                    <>
-                      <SaveIcon className="h-3 w-3 mr-1" />
-                      Save
-                    </>
-                  )}
-                </Button>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={onCancel}
+                    disabled={updateCall.isPending || deleteCall.isPending}
+                    className="h-8 text-xs"
+                  >
+                    <XIcon className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    disabled={updateCall.isPending || deleteCall.isPending}
+                    className="h-8 text-xs"
+                  >
+                    {updateCall.isPending ? "Saving..." : (
+                      <>
+                        <SaveIcon className="h-3 w-3 mr-1" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>

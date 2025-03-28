@@ -162,20 +162,26 @@ export function EditShowDialog({
             </div>
             
             <DialogFooter className="pt-4 border-t">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={() => onOpenChange(false)}
-                disabled={updateShow.isPending}
+              <div 
+                className="touch-manipulation"
+                onClick={() => !updateShow.isPending && onOpenChange(false)}
               >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={updateShow.isPending || !show}
-              >
-                {updateShow.isPending ? "Saving..." : "Save Changes"}
-              </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  disabled={updateShow.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+              <div className="touch-manipulation">
+                <Button 
+                  type="submit" 
+                  disabled={updateShow.isPending || !show}
+                >
+                  {updateShow.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>
