@@ -4,7 +4,11 @@ import { sendNotification } from "@/lib/utils";
 
 export function CallItem({ call, number }: CallItemProps) {
   const handleNotification = () => {
-    sendNotification(`${call.groupName} Call: ${call.description}`, {
+    const groupText = call.groupNames && call.groupNames.length > 0 
+      ? `${call.groupNames.join(', ')} Call`
+      : 'Call';
+      
+    sendNotification(`${groupText}: ${call.description}`, {
       body: "Time to prepare! Your call is now.",
       icon: "/favicon.ico"
     });
@@ -18,11 +22,13 @@ export function CallItem({ call, number }: CallItemProps) {
       <div className="flex-grow">
         <div className="flex items-center">
           <span className="text-gray-900 font-medium">{call.description}</span>
-          {call.groupName && (
-            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-              {call.groupName}
-            </span>
-          )}
+          <div className="flex flex-wrap gap-1 ml-2">
+            {call.groupNames && call.groupNames.map((groupName, idx) => (
+              <span key={idx} className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                {groupName}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
       <div className="text-right">

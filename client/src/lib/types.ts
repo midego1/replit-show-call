@@ -9,6 +9,7 @@ export interface ShowWithDetails extends Show {
 export interface CallWithDetails extends Call {
   number?: number;
   groupName?: string;
+  groupNames?: string[];
   timerString?: string;
 }
 

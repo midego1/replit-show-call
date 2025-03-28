@@ -201,11 +201,27 @@ export class MemStorage implements IStorage {
     );
     
     if (allGroup) {
-      Array.from(this.calls.values())
-        .filter((call) => call.groupId === id)
-        .forEach((call) => {
-          this.calls.set(call.id, { ...call, groupId: allGroup.id });
-        });
+      // Update calls that have this group in their groupIds
+      Array.from(this.calls.values()).forEach((call) => {
+        // Parse groupIds if it's a string
+        const groupIdsArray = typeof call.groupIds === 'string' 
+          ? JSON.parse(call.groupIds) as number[] 
+          : call.groupIds;
+        
+        // Check if this group is in the array
+        if (groupIdsArray.includes(id)) {
+          // Remove the group from the array and add the All group if not already there
+          const updatedGroupIds = groupIdsArray
+            .filter(gId => gId !== id)
+            .concat(groupIdsArray.includes(allGroup.id) ? [] : [allGroup.id]);
+          
+          // Update the call
+          this.calls.set(call.id, { 
+            ...call, 
+            groupIds: JSON.stringify(updatedGroupIds) 
+          });
+        }
+      });
     }
     
     return this.groups.delete(id);
@@ -224,7 +240,16 @@ export class MemStorage implements IStorage {
 
   async createCall(insertCall: InsertCall): Promise<Call> {
     const id = this.callId++;
-    const call: Call = { ...insertCall, id };
+    
+    // Ensure groupIds is stored as a string if it's an array
+    const processedCall = {
+      ...insertCall,
+      groupIds: Array.isArray(insertCall.groupIds) 
+        ? JSON.stringify(insertCall.groupIds) 
+        : insertCall.groupIds
+    };
+    
+    const call: Call = { ...processedCall, id };
     this.calls.set(id, call);
     return call;
   }
@@ -235,8 +260,18 @@ export class MemStorage implements IStorage {
   ): Promise<Call | undefined> {
     const call = this.calls.get(id);
     if (!call) return undefined;
+    
+    // Process groupIds if it's being updated
+    const processedUpdates = { 
+      ...updates,
+      groupIds: updates.groupIds !== undefined 
+        ? (Array.isArray(updates.groupIds) 
+          ? JSON.stringify(updates.groupIds) 
+          : updates.groupIds)
+        : call.groupIds
+    };
 
-    const updatedCall = { ...call, ...updates };
+    const updatedCall = { ...call, ...processedUpdates };
     this.calls.set(id, updatedCall);
     return updatedCall;
   }

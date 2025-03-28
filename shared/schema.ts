@@ -52,7 +52,7 @@ export const calls = pgTable("calls", {
   id: serial("id").primaryKey(),
   description: text("description").notNull(),
   minutesBefore: integer("minutes_before").notNull(),
-  groupId: integer("group_id").notNull(),
+  groupIds: text("group_ids").notNull(), // Storing JSON array of group IDs as string
   showId: integer("show_id").notNull(),
 });
 

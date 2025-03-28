@@ -97,12 +97,24 @@ export default function Home() {
             
             // Process calls with numbers and group names
             const processedCalls: CallWithDetails[] = calls.map((call, idx) => {
-              const groupName = showGroups.find(g => g.id === call.groupId)?.name;
+              // Process groupIds from string to array if needed
+              const groupIdsArray = typeof call.groupIds === 'string'
+                ? JSON.parse(call.groupIds as string)
+                : (call.groupIds || []);
+              
+              // Get all group names for this call
+              const groupNames = showGroups
+                .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
+                .map(g => g.name);
+              
+              // Keep groupName for backward compatibility
+              const groupName = groupNames.length > 0 ? groupNames[0] : '';
               
               return {
                 ...call,
                 number: idx + 1,
-                groupName
+                groupName,
+                groupNames
               };
             }).sort((a, b) => b.minutesBefore - a.minutesBefore);
             
