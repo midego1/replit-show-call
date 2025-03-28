@@ -50,9 +50,7 @@ export function CallItem({ call, number }: CallItemProps) {
           className="flex items-start py-3 px-3 cursor-pointer relative hover:bg-gray-50 transition-colors"
           onClick={toggleEdit}
         >
-          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-400 text-white font-medium mr-3">
-            {number.toString().padStart(2, "0")}
-          </div>
+          {/* Removed number indicator as requested */}
           
           <div className="flex-grow">
             <div className="flex justify-between items-start">
