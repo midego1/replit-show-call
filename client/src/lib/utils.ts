@@ -21,12 +21,12 @@ export function formatShowTime(date: Date): string {
 }
 
 export function formatTimerString(milliseconds: number): string {
-  if (milliseconds <= 0) return "0m 00s";
+  if (milliseconds <= 0) return "00:00";
   
-  const minutes = Math.floor(milliseconds / (1000 * 60));
-  const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
   
-  return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 }
 
 export function calculateCallTime(showStartTime: Date, minutesBefore: number): Date {
