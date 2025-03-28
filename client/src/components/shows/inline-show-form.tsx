@@ -137,30 +137,33 @@ export function InlineShowForm({
           </div>
           
           <div className="flex justify-end space-x-2 pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm"
-              onClick={onCancel}
-              disabled={createShow.isPending}
-              className="h-8 text-xs"
-            >
-              <XIcon className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              size="sm"
-              disabled={createShow.isPending}
-              className="h-8 text-xs"
-            >
-              {createShow.isPending ? "Saving..." : (
-                <>
-                  <SaveIcon className="h-3 w-3 mr-1" />
-                  Save
-                </>
-              )}
-            </Button>
+            <div className="touch-manipulation" onClick={() => !createShow.isPending && onCancel()}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                disabled={createShow.isPending}
+                className="h-8 text-xs"
+              >
+                <XIcon className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+            </div>
+            <div className="touch-manipulation">
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={createShow.isPending}
+                className="h-8 text-xs"
+              >
+                {createShow.isPending ? "Saving..." : (
+                  <>
+                    <SaveIcon className="h-3 w-3 mr-1" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

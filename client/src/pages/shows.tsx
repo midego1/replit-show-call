@@ -26,16 +26,11 @@ export default function Shows() {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   
-  // Helper function to handle adding a show with device-appropriate UI
+  // Helper function to handle adding a show - now always uses inline form
   const handleAddShow = useCallback(() => {
-    if (isMobile) {
-      // Use modal dialog on mobile devices for better touch experience
-      setShowCreateDialog(true);
-    } else {
-      // Use inline form on desktop
-      setShowAddForm(true);
-    }
-  }, [isMobile]);
+    // Always use inline form per user preference
+    setShowAddForm(true);
+  }, []);
   
   // Fetch shows
   const { data: shows = [] } = useQuery<Show[]>({
@@ -215,14 +210,16 @@ export default function Shows() {
               className="w-full mb-2 cursor-pointer touch-manipulation"
               onClick={handleAddShow}
             >
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full py-4 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary active:bg-primary/5"
-              >
-                <PlusIcon className="h-5 w-5 mr-2" />
-                Add New Show
-              </Button>
+              <div className="touch-manipulation w-full h-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full py-4 border-dashed border-gray-300 text-gray-500 hover:text-primary hover:border-primary active:bg-primary/5"
+                >
+                  <PlusIcon className="h-5 w-5 mr-2" />
+                  Add New Show
+                </Button>
+              </div>
             </div>
           )}
           
