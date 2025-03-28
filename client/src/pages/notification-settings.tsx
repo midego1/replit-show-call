@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { BellIcon, ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { BellIcon, ArrowLeftIcon, CheckIcon, VolumeIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, Link } from "wouter";
-import { requestNotificationPermission, sendNotification, isIOS, isNotificationsSupported } from "@/lib/utils";
+import { requestNotificationPermission, sendNotification, isIOS, isNotificationsSupported, playNotificationSound } from "@/lib/utils";
 
 // Create a type that includes all possible status values explicitly
 type NotificationStatusType = "granted" | "denied" | "default" | "unsupported";
@@ -127,10 +127,11 @@ export default function NotificationSettings() {
           <CardContent className="p-4">
             <p className="text-sm mb-2">
               Since iOS Safari doesn't support web notifications, we'll show you in-app notifications 
-              when it's time for your calls.
+              with an audio alert sound when it's time for your calls.
             </p>
             <p className="text-sm mb-2">
               <strong>Note:</strong> To receive notifications, the app must be open in your browser.
+              Sound alerts help ensure you don't miss any calls.
             </p>
             <Button
               variant="outline"
@@ -141,7 +142,7 @@ export default function NotificationSettings() {
               })}
             >
               <BellIcon className="mr-2 h-4 w-4" />
-              Test In-App Notification
+              Test Notification with Sound
             </Button>
           </CardContent>
         </Card>
@@ -235,7 +236,7 @@ export default function NotificationSettings() {
               disabled={permissionStatus !== "granted"}
             >
               <BellIcon className="mr-2 h-4 w-4" />
-              Send Test Notification
+              Send Test Notification with Sound
             </Button>
           </div>
         </CardContent>
@@ -246,11 +247,29 @@ export default function NotificationSettings() {
           <h3 className="font-medium">Notification Settings</h3>
         </CardHeader>
         <CardContent className="p-4">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm mb-4">
             You can control notification settings for each call when you create or edit it.
             Go to a specific call and toggle the "Send Notification" option to enable or disable
-            notifications for that call.
+            notifications for that call. All notifications include an audio alert sound to help 
+            get your attention when it's time for a call.
           </p>
+          
+          <div className="flex justify-center">
+            <Button 
+              variant="outline" 
+              className="flex items-center"
+              onClick={() => {
+                playNotificationSound();
+                toast({
+                  title: "Sound Test",
+                  description: "Played notification sound",
+                });
+              }}
+            >
+              <VolumeIcon className="mr-2 h-4 w-4" />
+              Test Notification Sound
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

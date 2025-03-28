@@ -69,6 +69,9 @@ export function requestNotificationPermission(): Promise<boolean> {
 }
 
 export function sendNotification(title: string, options?: NotificationOptions): void {
+  // Play notification sound regardless of notification method
+  playNotificationSound();
+  
   // First try native Notifications if supported and permission granted
   if (isNotificationsSupported() && Notification.permission === "granted") {
     new Notification(title, options);
@@ -79,6 +82,53 @@ export function sendNotification(title: string, options?: NotificationOptions): 
   if (isIOS()) {
     // Create an in-app notification that appears at the top of the screen
     createInAppNotification(title, options?.body || "");
+  }
+}
+
+// Play notification sound
+export function playNotificationSound(): void {
+  try {
+    // Create a new audio context
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create oscillator for a pleasant notification tone
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // Configure the sound
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
+    
+    // Configure volume envelope
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.6);
+    
+    // Connect and start
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.6);
+    
+    // Play a secondary tone after a short delay
+    setTimeout(() => {
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode2 = audioContext.createGain();
+      
+      oscillator2.type = 'sine';
+      oscillator2.frequency.setValueAtTime(1100, audioContext.currentTime); // C#6 note
+      
+      gainNode2.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode2.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
+      gainNode2.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.4);
+      
+      oscillator2.connect(gainNode2);
+      gainNode2.connect(audioContext.destination);
+      oscillator2.start();
+      oscillator2.stop(audioContext.currentTime + 0.4);
+    }, 150);
+  } catch (error) {
+    console.error("Could not play notification sound:", error);
   }
 }
 
