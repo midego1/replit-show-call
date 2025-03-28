@@ -42,7 +42,7 @@ export function ShowCard({
   return (
     <Card className="overflow-hidden shadow-sm">
       <CardHeader 
-        className="px-5 py-4 flex flex-col cursor-pointer"
+        className="px-5 py-4 flex flex-col cursor-pointer hover:bg-gray-50 transition-colors"
         onClick={() => onToggleExpand(show.id)}
       >
         <div className="flex justify-between items-start">
@@ -51,7 +51,10 @@ export function ShowCard({
             <p className="text-sm text-gray-500">{show.description}</p>
           </div>
           <div>
-            {expanded ? <ChevronUpIcon className="text-gray-500" /> : <ChevronDownIcon className="text-gray-500" />}
+            {expanded ? 
+              <ChevronUpIcon className="h-5 w-5 text-gray-500" /> : 
+              <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+            }
           </div>
         </div>
         
