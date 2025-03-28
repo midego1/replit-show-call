@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom touch handling improvements for iOS */
-.touch-manipulation {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-  min-height: 44px; /* iOS recommended minimum touch target size */
-  display: flex;
-  align-items: center;
-}
-
-/* Global CSS variables */
-:root {
-  --primary-light: rgba(98, 0, 238, 0.8);
-}
-
 @layer base {
   * {
     @apply border-border;

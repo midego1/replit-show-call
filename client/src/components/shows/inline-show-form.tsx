@@ -136,58 +136,31 @@ export function InlineShowForm({
             />
           </div>
           
-          <div className="flex justify-end space-x-3 pt-2">
-            <button
-              type="button"
-              onClick={() => !createShow.isPending && onCancel()}
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm"
+              onClick={onCancel}
               disabled={createShow.isPending}
-              style={{
-                backgroundColor: 'white',
-                color: 'var(--foreground)',
-                border: '1px solid var(--border)',
-                borderRadius: '4px',
-                padding: '0 12px',
-                height: '36px',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: createShow.isPending ? 'not-allowed' : 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-                WebkitTouchCallout: 'none',
-                opacity: createShow.isPending ? 0.5 : 1
-              }}
+              className="h-8 text-xs"
             >
-              <XIcon style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+              <XIcon className="h-3 w-3 mr-1" />
               Cancel
-            </button>
-            <button
-              type="submit"
+            </Button>
+            <Button 
+              type="submit" 
+              size="sm"
               disabled={createShow.isPending}
-              style={{
-                backgroundColor: 'var(--primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '0 12px',
-                height: '36px',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: createShow.isPending ? 'not-allowed' : 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-                WebkitTouchCallout: 'none',
-                opacity: createShow.isPending ? 0.5 : 1
-              }}
+              className="h-8 text-xs"
             >
               {createShow.isPending ? "Saving..." : (
                 <>
-                  <SaveIcon style={{ width: '14px', height: '14px', marginRight: '4px' }} />
+                  <SaveIcon className="h-3 w-3 mr-1" />
                   Save
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </Form>
