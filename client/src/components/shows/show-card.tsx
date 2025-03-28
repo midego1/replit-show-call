@@ -1,13 +1,15 @@
 import { useState, useCallback } from "react";
 import { ShowCardProps } from "@/lib/types";
 import { CallItem } from "@/components/shows/call-item";
+import { InlineCallForm } from "@/components/shows/inline-call-form";
 import { 
   ChevronDownIcon, 
   ChevronUpIcon,
   ClockIcon,
   CalendarIcon,
   SettingsIcon,
-  PlusCircleIcon 
+  PlusCircleIcon,
+  XIcon
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,20 @@ export function ShowCard({
   onToggleExpand,
   onAddCall
 }: ShowCardProps) {
+  const [showInlineForm, setShowInlineForm] = useState(false);
+  
+  const handleAddCall = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card expansion toggle
+    setShowInlineForm(true);
+  };
+  
+  const handleFormComplete = () => {
+    setShowInlineForm(false);
+  };
+  
+  const handleFormCancel = () => {
+    setShowInlineForm(false);
+  };
   
   return (
     <Card className="overflow-hidden shadow-sm">
@@ -48,10 +64,7 @@ export function ShowCard({
             <Button 
               variant="ghost" 
               className="flex-1 rounded-none py-3 text-gray-500 hover:text-primary hover:bg-gray-50"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent card expansion toggle
-                onAddCall(show.id);
-              }}
+              onClick={handleAddCall}
             >
               <PlusCircleIcon className="w-4 h-4 mr-2" />
               <span className="text-sm">Add Call</span>
@@ -74,6 +87,15 @@ export function ShowCard({
             </Button>
           </div>
           
+          {/* Inline Add Call Form */}
+          {showInlineForm && (
+            <InlineCallForm 
+              showId={show.id} 
+              onComplete={handleFormComplete} 
+              onCancel={handleFormCancel} 
+            />
+          )}
+          
           {/* Calls List */}
           <CardContent className="px-2 py-1 bg-gray-50">
             {calls.length > 0 ? (
@@ -89,7 +111,7 @@ export function ShowCard({
                 <p>No calls added yet</p>
                 <Button 
                   variant="link" 
-                  onClick={() => onAddCall(show.id)}
+                  onClick={handleAddCall}
                   className="text-primary mt-2"
                 >
                   Add your first call

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ShowCard } from "@/components/shows/show-card";
-import { CreateCallDialog } from "@/components/shows/create-call-dialog";
 import { CreateShowDialog } from "@/components/shows/create-show-dialog";
 import { FloatingActionButton } from "@/components/floating-action-button";
 import { Show, Call, Group } from "@shared/schema";
@@ -13,8 +12,6 @@ import { Button } from "@/components/ui/button";
 export default function Home() {
   const [expandedShowId, setExpandedShowId] = useState<number | null>(null);
   const [showCreateShowDialog, setShowCreateShowDialog] = useState(false);
-  const [showCreateCallDialog, setShowCreateCallDialog] = useState(false);
-  const [selectedShowId, setSelectedShowId] = useState<number | null>(null);
   
   // Fetch shows
   const { data: shows = [], isLoading: isLoadingShows } = useQuery<Show[]>({
@@ -50,10 +47,9 @@ export default function Home() {
     setExpandedShowId(expandedShowId === showId ? null : showId);
   };
   
-  // Handle add call
+  // Handle add call - this is now a no-op since the form is inline
   const handleAddCall = (showId: number) => {
-    setSelectedShowId(showId);
-    setShowCreateCallDialog(true);
+    // The ShowCard component now handles this internally
   };
   
   // Set first show expanded by default if there's at least one
@@ -130,12 +126,6 @@ export default function Home() {
       <CreateShowDialog
         open={showCreateShowDialog}
         onOpenChange={setShowCreateShowDialog}
-      />
-      
-      <CreateCallDialog
-        open={showCreateCallDialog}
-        onOpenChange={setShowCreateCallDialog}
-        showId={selectedShowId}
       />
     </div>
   );
