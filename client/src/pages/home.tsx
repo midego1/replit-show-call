@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ShowCard } from "@/components/shows/show-card";
-import { CreateShowDialog } from "@/components/shows/create-show-dialog";
+import { InlineShowForm } from "@/components/shows/inline-show-form";
 import { FloatingActionButton } from "@/components/floating-action-button";
 import { Show, Call, Group } from "@shared/schema";
 import { ShowWithDetails, CallWithDetails } from "@/lib/types";
 import { formatTimeRemaining, formatShowDate, calculateTimeRemaining } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [expandedShowId, setExpandedShowId] = useState<number | null>(null);
-  const [showCreateShowDialog, setShowCreateShowDialog] = useState(false);
+  const [showInlineShowForm, setShowInlineShowForm] = useState(false);
   
   // Fetch shows
   const { data: shows = [], isLoading: isLoadingShows } = useQuery<Show[]>({
@@ -69,8 +69,8 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Empty State */}
-      {processedShows.length === 0 && !isLoadingShows ? (
+      {/* Show creation section */}
+      {!showInlineShowForm && processedShows.length === 0 && !isLoadingShows ? (
         <div className="text-center py-12">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-200 mb-4">
             <CalendarIcon className="h-8 w-8 text-gray-400" />
@@ -78,67 +78,83 @@ export default function Home() {
           <h3 className="text-lg font-medium mb-2">No upcoming calls</h3>
           <p className="text-gray-500 mb-4">Add your first show to get started</p>
           <Button
-            onClick={() => setShowCreateShowDialog(true)}
+            onClick={() => setShowInlineShowForm(true)}
             className="rounded-full px-6"
           >
             Create Show
           </Button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {processedShows.map((show) => {
-            // Filter calls for this show
-            const calls = allCalls.filter(call => call.showId === show.id);
-            
-            // Get relevant groups (includes default groups)
-            const showGroups = allGroups.filter(
-              group => group.isCustom === 0 || group.showId === show.id
-            );
-            
-            // Process calls with numbers and group names
-            const processedCalls: CallWithDetails[] = calls.map((call, idx) => {
-              // Process groupIds from string to array if needed
-              const groupIdsArray = typeof call.groupIds === 'string'
-                ? JSON.parse(call.groupIds as string)
-                : (call.groupIds || []);
-              
-              // Get all group names for this call
-              const groupNames = showGroups
-                .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
-                .map(g => g.name);
-              
-              // Keep groupName for backward compatibility
-              const groupName = groupNames.length > 0 ? groupNames[0] : '';
-              
-              return {
-                ...call,
-                number: idx + 1,
-                groupName,
-                groupNames
-              };
-            }).sort((a, b) => b.minutesBefore - a.minutesBefore);
-            
-            return (
-              <ShowCard
-                key={show.id}
-                show={show}
-                calls={processedCalls}
-                groups={showGroups}
-                expanded={expandedShowId === show.id}
-                onToggleExpand={handleToggleExpand}
-                onAddCall={handleAddCall}
-              />
-            );
-          })}
+      ) : !showInlineShowForm && processedShows.length > 0 ? (
+        <div className="mb-6">
+          <Button
+            onClick={() => setShowInlineShowForm(true)}
+            variant="outline"
+            className="w-full flex items-center justify-center py-6 border-dashed"
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Add Show
+          </Button>
         </div>
+      ) : null}
+      
+      {/* Inline show form */}
+      {showInlineShowForm && (
+        <InlineShowForm
+          onComplete={() => setShowInlineShowForm(false)}
+          onCancel={() => setShowInlineShowForm(false)}
+        />
       )}
       
-      <FloatingActionButton onClick={() => setShowCreateShowDialog(true)} />
+      {/* Shows list */}
+      <div className="space-y-6">
+        {processedShows.map((show) => {
+          // Filter calls for this show
+          const calls = allCalls.filter(call => call.showId === show.id);
+          
+          // Get relevant groups (includes default groups)
+          const showGroups = allGroups.filter(
+            group => group.isCustom === 0 || group.showId === show.id
+          );
+          
+          // Process calls with numbers and group names
+          const processedCalls: CallWithDetails[] = calls.map((call, idx) => {
+            // Process groupIds from string to array if needed
+            const groupIdsArray = typeof call.groupIds === 'string'
+              ? JSON.parse(call.groupIds as string)
+              : (call.groupIds || []);
+            
+            // Get all group names for this call
+            const groupNames = showGroups
+              .filter(g => groupIdsArray && Array.isArray(groupIdsArray) && groupIdsArray.includes(g.id))
+              .map(g => g.name);
+            
+            // Keep groupName for backward compatibility
+            const groupName = groupNames.length > 0 ? groupNames[0] : '';
+            
+            return {
+              ...call,
+              number: idx + 1,
+              groupName,
+              groupNames
+            };
+          }).sort((a, b) => b.minutesBefore - a.minutesBefore);
+          
+          return (
+            <ShowCard
+              key={show.id}
+              show={show}
+              calls={processedCalls}
+              groups={showGroups}
+              expanded={expandedShowId === show.id}
+              onToggleExpand={handleToggleExpand}
+              onAddCall={handleAddCall}
+            />
+          );
+        })}
+      </div>
       
-      <CreateShowDialog
-        open={showCreateShowDialog}
-        onOpenChange={setShowCreateShowDialog}
-      />
+      {/* We'll keep the FloatingActionButton but change its functionality */}
+      <FloatingActionButton onClick={() => setShowInlineShowForm(true)} />
     </div>
   );
 }
