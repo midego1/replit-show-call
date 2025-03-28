@@ -117,18 +117,32 @@ export default function NotificationSettings() {
       </div>
 
       {isIOS() && (
-        <Card className="mb-6 shadow-sm border-orange-200">
-          <CardHeader className="px-4 py-3 bg-orange-50 border-b border-orange-200">
-            <h3 className="font-medium flex items-center text-orange-700">
+        <Card className="mb-6 shadow-sm border-blue-200">
+          <CardHeader className="px-4 py-3 bg-blue-50 border-b border-blue-200">
+            <h3 className="font-medium flex items-center text-blue-700">
               <BellIcon className="mr-2 h-5 w-5" />
-              iOS Not Supported
+              In-App Notifications
             </h3>
           </CardHeader>
           <CardContent className="p-4">
-            <p className="text-sm">
-              iOS Safari doesn't support web notifications. To receive call notifications, 
-              please use Chrome or Firefox on a desktop computer.
+            <p className="text-sm mb-2">
+              Since iOS Safari doesn't support web notifications, we'll show you in-app notifications 
+              when it's time for your calls.
             </p>
+            <p className="text-sm mb-2">
+              <strong>Note:</strong> To receive notifications, the app must be open in your browser.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => sendNotification("Test In-App Notification", {
+                body: "This is how notifications will appear on your iOS device when it's time for a call."
+              })}
+            >
+              <BellIcon className="mr-2 h-4 w-4" />
+              Test In-App Notification
+            </Button>
           </CardContent>
         </Card>
       )}

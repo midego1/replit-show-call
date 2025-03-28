@@ -128,36 +128,50 @@ export default function Home() {
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
       
-      {/* iOS Warning Banner */}
+      {/* iOS Notification Banner */}
       {isIOS() && showIosWarning && (
-        <Card className="mb-6 shadow-sm border-orange-200">
-          <CardHeader className="px-4 py-3 bg-orange-50 border-b border-orange-200 flex flex-row items-center justify-between">
-            <div className="flex items-center text-orange-700">
+        <Card className="mb-6 shadow-sm border-blue-200">
+          <CardHeader className="px-4 py-3 bg-blue-50 border-b border-blue-200 flex flex-row items-center justify-between">
+            <div className="flex items-center text-blue-700">
               <InfoIcon className="mr-2 h-5 w-5" />
-              <h3 className="font-medium">Notification Compatibility</h3>
+              <h3 className="font-medium">In-App Notifications</h3>
             </div>
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleDismissIosWarning}
-              className="h-8 w-8 text-orange-700"
+              className="h-8 w-8 text-blue-700"
             >
               <XIcon className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="p-4">
             <p className="text-sm mb-2">
-              iOS Safari doesn't support web notifications. Call notifications won't work on this device.
+              We'll show in-app notifications for your calls when this app is open.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={() => setLocation("/notification-settings")}
-            >
-              <InfoIcon className="mr-1 h-3 w-3" />
-              More information
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => sendNotification("Test Notification", {
+                  body: "This is how your call notifications will appear."
+                })}
+              >
+                <BellIcon className="mr-1 h-3 w-3" />
+                Test Notification
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => setLocation("/notification-settings")}
+              >
+                <InfoIcon className="mr-1 h-3 w-3" />
+                Settings
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

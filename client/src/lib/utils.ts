@@ -47,7 +47,7 @@ export function isIOS(): boolean {
 }
 
 export function isNotificationsSupported(): boolean {
-  return ("Notification" in window) && !isIOS();
+  return "Notification" in window;
 }
 
 export function requestNotificationPermission(): Promise<boolean> {
@@ -69,11 +69,115 @@ export function requestNotificationPermission(): Promise<boolean> {
 }
 
 export function sendNotification(title: string, options?: NotificationOptions): void {
-  if (!isNotificationsSupported() || Notification.permission !== "granted") {
+  // First try native Notifications if supported and permission granted
+  if (isNotificationsSupported() && Notification.permission === "granted") {
+    new Notification(title, options);
     return;
   }
   
-  new Notification(title, options);
+  // For iOS, we'll create an in-app notification as fallback
+  if (isIOS()) {
+    // Create an in-app notification that appears at the top of the screen
+    createInAppNotification(title, options?.body || "");
+  }
+}
+
+// Helper function to create an in-app notification for iOS and other platforms
+// that don't support the Notifications API
+function createInAppNotification(title: string, body: string): void {
+  // Create elements
+  const notificationEl = document.createElement("div");
+  const titleEl = document.createElement("div");
+  const bodyEl = document.createElement("div");
+  const closeEl = document.createElement("button");
+  
+  // Set content
+  titleEl.textContent = title;
+  bodyEl.textContent = body;
+  closeEl.textContent = "×";
+  
+  // Add styles
+  notificationEl.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    width: 350px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    padding: 12px 16px;
+    animation: slideIn 0.3s ease-out;
+    border-left: 4px solid #6200EE;
+  `;
+  
+  titleEl.style.cssText = `
+    font-weight: bold;
+    margin-bottom: 4px;
+    padding-right: 24px;
+  `;
+  
+  bodyEl.style.cssText = `
+    font-size: 14px;
+    color: #666;
+  `;
+  
+  closeEl.style.cssText = `
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+    padding: 0;
+  `;
+  
+  // Add a simple slide-in animation
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    @keyframes slideIn {
+      from { transform: translate(-50%, -100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translate(-50%, 0); opacity: 1; }
+      to { transform: translate(-50%, -100%); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(styleEl);
+  
+  // Append elements
+  notificationEl.appendChild(titleEl);
+  notificationEl.appendChild(bodyEl);
+  notificationEl.appendChild(closeEl);
+  document.body.appendChild(notificationEl);
+  
+  // Add event listener to close button
+  closeEl.addEventListener('click', () => {
+    notificationEl.style.animation = 'slideOut 0.3s ease-in forwards';
+    setTimeout(() => {
+      document.body.removeChild(notificationEl);
+    }, 300);
+  });
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (document.body.contains(notificationEl)) {
+      notificationEl.style.animation = 'slideOut 0.3s ease-in forwards';
+      setTimeout(() => {
+        if (document.body.contains(notificationEl)) {
+          document.body.removeChild(notificationEl);
+        }
+      }, 300);
+    }
+  }, 5000);
 }
 
 // Helper function to check if it's time to send auto-notifications for calls
@@ -83,7 +187,9 @@ export function checkAndSendAutoNotifications(
   notifiedCallIds: Set<number>,
   setNotifiedCallIds: (callIds: Set<number>) => void
 ): void {
-  if (!isNotificationsSupported() || Notification.permission !== "granted") {
+  // On iOS, we can always send in-app notifications
+  // On other platforms, we need notification permission
+  if (!isIOS() && (!isNotificationsSupported() || Notification.permission !== "granted")) {
     return;
   }
   
