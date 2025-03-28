@@ -105,14 +105,18 @@ export function CallItem({ call, number }: CallItemProps) {
               </Button>
             </div>
             
-            <div className="text-right">
+            <div className="text-right whitespace-nowrap">
               {call.timerString ? (
                 call.timerString === "00:00" ? (
                   <span className="text-sm font-medium text-red-500">Now</span>
                 ) : call.minutesBefore <= 15 ? (
-                  <span className="text-sm font-medium text-orange-500">{call.timerString}</span>
+                  <span className="text-sm font-medium text-orange-500">
+                    {call.timerString} <span className="text-xs font-normal">until call</span>
+                  </span>
                 ) : (
-                  <span className="text-sm font-medium text-primary">{call.timerString}</span>
+                  <span className="text-sm font-medium text-primary">
+                    {call.timerString} <span className="text-xs font-normal">until call</span>
+                  </span>
                 )
               ) : (
                 <span className="text-sm font-medium text-gray-500">Time not set</span>
