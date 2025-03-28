@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,7 +12,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Group, Call } from "@shared/schema";
 import { SaveIcon, XIcon, Trash2Icon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { sendNotification, requestNotificationPermission } from "@/lib/utils";
 
 // Extend the insertCallSchema with client-side validation
 const editCallSchema = z.object({
@@ -43,7 +41,6 @@ export function EditCallForm({
   onCancel,
   onDelete
 }: EditCallFormProps) {
-  const [isSendingNotification, setIsSendingNotification] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -116,61 +113,7 @@ export function EditCallForm({
     form.setValue("groupIds", newSelection, { shouldValidate: true });
   };
   
-  // Handle sending notifications
-  const handleSendNotification = async () => {
-    setIsSendingNotification(true);
-    
-    try {
-      // Request notification permission
-      const isPermissionGranted = await requestNotificationPermission();
-      
-      if (!isPermissionGranted) {
-        toast({
-          title: "Permission denied",
-          description: "You need to grant notification permission to send notifications.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Get selected group names for the notification
-      const selectedGroupIds = form.getValues("groupIds");
-      const selectedGroups = groups.filter(group => selectedGroupIds.includes(group.id));
-      const groupNames = selectedGroups.map(group => group.name);
-      
-      // Format message
-      const groupText = groupNames.length > 0 
-        ? `${groupNames.join(', ')} Call`
-        : 'Call';
-      
-      const callTitle = form.getValues("title");
-      const callDescription = form.getValues("description");
-      
-      // Send the notification
-      sendNotification(`${groupText}: ${callTitle || 'Call Time'}`, {
-        body: callDescription 
-          ? callDescription 
-          : `Time for ${groupText}! Please prepare for the show.`,
-        icon: "/favicon.ico"
-      });
-      
-      // Show success toast
-      toast({
-        title: "Notification sent",
-        description: `Notification sent to ${groupNames.join(', ') || 'all groups'}.`,
-        variant: "default"
-      });
-    } catch (error) {
-      toast({
-        title: "Error sending notification",
-        description: "There was a problem sending the notification.",
-        variant: "destructive"
-      });
-      console.error("Notification error:", error);
-    } finally {
-      setIsSendingNotification(false);
-    }
-  };
+  // The notification function has been removed
   
   return (
     <div className="p-4 bg-gray-50 border-b border-gray-200">
@@ -281,76 +224,45 @@ export function EditCallForm({
                 )}
               />
               
-              {/* Mobile-friendly action buttons */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-2">
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                  {/* Delete button */}
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => deleteCall.mutate()}
-                    disabled={deleteCall.isPending || updateCall.isPending}
-                    className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2Icon className="h-3 w-3 mr-1" />
-                    Delete
-                  </Button>
-                  
-                  {/* Send notification checkbox */}
-                  <div className="flex items-center space-x-2 py-1 px-2 bg-gray-50 rounded-md border border-gray-100">
-                    <input
-                      type="checkbox"
-                      id="send-notification-now"
-                      disabled={isSendingNotification || form.getValues("groupIds").length === 0}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          handleSendNotification();
-                          // Reset the checkbox after sending
-                          setTimeout(() => {
-                            const checkbox = document.getElementById("send-notification-now") as HTMLInputElement;
-                            if (checkbox) checkbox.checked = false;
-                          }, 500);
-                        }
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <label 
-                      htmlFor="send-notification-now" 
-                      className="text-xs font-medium text-gray-700 cursor-pointer truncate"
-                    >
-                      {isSendingNotification ? "Sending..." : "Send notification now"}
-                    </label>
-                  </div>
-                </div>
+              {/* Action buttons */}
+              <div className="flex justify-end space-x-2 pt-3">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => deleteCall.mutate()}
+                  disabled={deleteCall.isPending || updateCall.isPending}
+                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  title="Delete"
+                >
+                  <Trash2Icon className="h-4 w-4" />
+                </Button>
                 
-                {/* Cancel/Save buttons */}
-                <div className="flex space-x-2 self-end sm:self-auto">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm"
-                    onClick={onCancel}
-                    disabled={updateCall.isPending || deleteCall.isPending || isSendingNotification}
-                    className="h-8 text-xs"
-                  >
-                    <XIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span className="hidden sm:inline">Cancel</span>
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    size="sm"
-                    disabled={updateCall.isPending || deleteCall.isPending || isSendingNotification}
-                    className="h-8 text-xs"
-                  >
-                    {updateCall.isPending ? "Saving..." : (
-                      <>
-                        <SaveIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                        <span className="hidden sm:inline">Save</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={onCancel}
+                  disabled={updateCall.isPending || deleteCall.isPending}
+                  className="h-8 text-xs"
+                >
+                  <XIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="hidden sm:inline">Cancel</span>
+                </Button>
+                
+                <Button 
+                  type="submit" 
+                  size="sm"
+                  disabled={updateCall.isPending || deleteCall.isPending}
+                  className="h-8 text-xs"
+                >
+                  {updateCall.isPending ? "Saving..." : (
+                    <>
+                      <SaveIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span className="hidden sm:inline">Save</span>
+                    </>
+                  )}
+                </Button>
               </div>
             </form>
           </Form>
