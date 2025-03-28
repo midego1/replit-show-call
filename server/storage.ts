@@ -114,6 +114,11 @@ export class MemStorage implements IStorage {
       description 
     };
     this.shows.set(id, show);
+    
+    // Add default "Cast" and "Crew" groups for the show
+    await this.createGroup({ name: "Cast", isCustom: 1, showId: id });
+    await this.createGroup({ name: "Crew", isCustom: 1, showId: id });
+    
     return show;
   }
 
@@ -301,4 +306,256 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Import database libraries
+import { db } from "./db";
+import { pool } from "./db";
+import { eq, and, or } from "drizzle-orm";
+
+// Keep the original IStorage interface without sessionStore
+export interface IStorage {
+  // User methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Show methods
+  getShow(id: number): Promise<Show | undefined>;
+  getShowsForUser(userId: number): Promise<Show[]>;
+  createShow(show: InsertShow): Promise<Show>;
+  updateShow(id: number, show: Partial<InsertShow>): Promise<Show | undefined>;
+  deleteShow(id: number): Promise<boolean>;
+  
+  // Group methods
+  getGroupsForShow(showId: number): Promise<Group[]>;
+  getDefaultGroups(): Promise<Group[]>;
+  getGroup(id: number): Promise<Group | undefined>;
+  createGroup(group: InsertGroup): Promise<Group>;
+  updateGroup(id: number, group: Partial<InsertGroup>): Promise<Group | undefined>;
+  deleteGroup(id: number): Promise<boolean>;
+  
+  // Call methods
+  getCallsForShow(showId: number): Promise<Call[]>;
+  getCall(id: number): Promise<Call | undefined>;
+  createCall(call: InsertCall): Promise<Call>;
+  updateCall(id: number, call: Partial<InsertCall>): Promise<Call | undefined>;
+  deleteCall(id: number): Promise<boolean>;
+}
+
+// Add the DatabaseStorage class implementation
+export class DatabaseStorage implements IStorage {
+  constructor() {
+    // Initialize default groups if they don't exist
+    this.initializeDefaultGroups();
+  }
+  
+  private async initializeDefaultGroups() {
+    // Check if default groups exist
+    const existingGroups = await db.select().from(groups).where(eq(groups.isCustom, 0));
+    
+    if (existingGroups.length === 0) {
+      // Create default groups
+      const defaultGroups = [
+        { name: "All", isCustom: 0, showId: null },
+        { name: "Cast", isCustom: 0, showId: null },
+        { name: "Crew", isCustom: 0, showId: null },
+        { name: "Staff", isCustom: 0, showId: null },
+        { name: "Guests", isCustom: 0, showId: null }
+      ];
+      
+      for (const group of defaultGroups) {
+        await db.insert(groups).values(group);
+      }
+    }
+  }
+  
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+  
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+  
+  // Show methods
+  async getShow(id: number): Promise<Show | undefined> {
+    const [show] = await db.select().from(shows).where(eq(shows.id, id));
+    return show;
+  }
+  
+  async getShowsForUser(userId: number): Promise<Show[]> {
+    return await db.select().from(shows).where(eq(shows.userId, userId));
+  }
+  
+  async createShow(insertShow: InsertShow): Promise<Show> {
+    // Start transaction
+    const result = await db.transaction(async (tx) => {
+      // Insert the show
+      const [show] = await tx.insert(shows).values(insertShow).returning();
+      
+      // Add default show-specific groups
+      await tx.insert(groups).values({ name: "Cast", isCustom: 1, showId: show.id });
+      await tx.insert(groups).values({ name: "Crew", isCustom: 1, showId: show.id });
+      
+      return show;
+    });
+    
+    return result;
+  }
+  
+  async updateShow(id: number, updates: Partial<InsertShow>): Promise<Show | undefined> {
+    const [updatedShow] = await db.update(shows)
+      .set(updates)
+      .where(eq(shows.id, id))
+      .returning();
+    
+    return updatedShow;
+  }
+  
+  async deleteShow(id: number): Promise<boolean> {
+    // Start transaction
+    const result = await db.transaction(async (tx) => {
+      // Delete associated calls first
+      await tx.delete(calls).where(eq(calls.showId, id));
+      
+      // Delete associated custom groups
+      await tx.delete(groups).where(eq(groups.showId, id));
+      
+      // Delete the show
+      const deleted = await tx.delete(shows).where(eq(shows.id, id)).returning();
+      
+      return deleted.length > 0;
+    });
+    
+    return result;
+  }
+  
+  // Group methods
+  async getGroupsForShow(showId: number): Promise<Group[]> {
+    // Return default groups (system-wide) and custom groups for this show
+    return await db.select().from(groups).where(
+      or(
+        eq(groups.isCustom, 0),
+        eq(groups.showId, showId)
+      )
+    );
+  }
+  
+  async getDefaultGroups(): Promise<Group[]> {
+    return await db.select().from(groups).where(eq(groups.isCustom, 0));
+  }
+  
+  async getGroup(id: number): Promise<Group | undefined> {
+    const [group] = await db.select().from(groups).where(eq(groups.id, id));
+    return group;
+  }
+  
+  async createGroup(insertGroup: InsertGroup): Promise<Group> {
+    const [group] = await db.insert(groups).values(insertGroup).returning();
+    return group;
+  }
+  
+  async updateGroup(id: number, updates: Partial<InsertGroup>): Promise<Group | undefined> {
+    const [updatedGroup] = await db.update(groups)
+      .set(updates)
+      .where(eq(groups.id, id))
+      .returning();
+    
+    return updatedGroup;
+  }
+  
+  async deleteGroup(id: number): Promise<boolean> {
+    // Start transaction
+    const result = await db.transaction(async (tx) => {
+      // Get the group
+      const [group] = await tx.select().from(groups).where(eq(groups.id, id));
+      
+      // Only allow deletion of custom groups
+      if (!group || group.isCustom === 0) {
+        return false;
+      }
+      
+      // Find the All group
+      const [allGroup] = await tx.select().from(groups).where(
+        and(
+          eq(groups.name, "All"),
+          eq(groups.isCustom, 0)
+        )
+      );
+      
+      // Update calls with this group
+      if (allGroup) {
+        // Get all calls that include this group
+        const callsWithGroup = await tx.select().from(calls);
+        
+        // Update each call to replace the deleted group with the All group
+        for (const call of callsWithGroup) {
+          // Parse the groupIds string to an array
+          const groupIds = JSON.parse(call.groupIds) as number[];
+          
+          if (groupIds.includes(id)) {
+            // Remove the group being deleted
+            const updatedGroupIds = groupIds
+              .filter(gId => gId !== id)
+              .concat(groupIds.includes(allGroup.id) ? [] : [allGroup.id]);
+            
+            // Update the call
+            await tx.update(calls)
+              .set({ groupIds: JSON.stringify(updatedGroupIds) })
+              .where(eq(calls.id, call.id));
+          }
+        }
+      }
+      
+      // Delete the group
+      const deleted = await tx.delete(groups).where(eq(groups.id, id)).returning();
+      
+      return deleted.length > 0;
+    });
+    
+    return result;
+  }
+  
+  // Call methods
+  async getCallsForShow(showId: number): Promise<Call[]> {
+    return await db.select().from(calls).where(eq(calls.showId, showId));
+  }
+  
+  async getCall(id: number): Promise<Call | undefined> {
+    const [call] = await db.select().from(calls).where(eq(calls.id, id));
+    return call;
+  }
+  
+  async createCall(insertCall: InsertCall): Promise<Call> {
+    const [call] = await db.insert(calls).values(insertCall).returning();
+    return call;
+  }
+  
+  async updateCall(id: number, updates: Partial<InsertCall>): Promise<Call | undefined> {
+    const [updatedCall] = await db.update(calls)
+      .set(updates)
+      .where(eq(calls.id, id))
+      .returning();
+    
+    return updatedCall;
+  }
+  
+  async deleteCall(id: number): Promise<boolean> {
+    const deleted = await db.delete(calls).where(eq(calls.id, id)).returning();
+    return deleted.length > 0;
+  }
+}
+
+// Initialize appropriate storage implementation
+// For development testing, using MemStorage
+// export const storage = new MemStorage();
+
+// For production use with PostgreSQL database
+export const storage = new DatabaseStorage();

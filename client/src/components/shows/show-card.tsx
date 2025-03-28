@@ -40,8 +40,7 @@ export function ShowCard({
   };
   
   // Add a handler to toggle the card expansion
-  const handleExpandToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleExpandToggle = () => {
     onToggleExpand(show.id);
   };
 
@@ -58,10 +57,6 @@ export function ShowCard({
           </div>
           <div 
             className="p-1 rounded-full hover:bg-gray-200 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent double toggling
-              onToggleExpand(show.id);
-            }}
           >
             {expanded ? 
               <ChevronUpIcon className="h-5 w-5 text-gray-500" /> : 

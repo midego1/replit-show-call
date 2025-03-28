@@ -8,9 +8,12 @@ import Home from "@/pages/home";
 import Shows from "@/pages/shows";
 import Groups from "@/pages/groups";
 import Profile from "@/pages/profile";
+import AuthPage from "@/pages/auth-page";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { NotificationPermissionDialog } from "@/components/notification-permission-dialog";
 import { TabOption } from "@/lib/types";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
   const [activeTab, setActiveTab] = useState<TabOption>("home");
@@ -33,7 +36,7 @@ function Router() {
     console.log("Notification permission granted");
   };
 
-  return (
+  const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => (
     <div className="pb-16 min-h-screen">
       {/* Header */}
       <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-10">
@@ -44,25 +47,7 @@ function Router() {
       
       {/* Main Content */}
       <main className="mt-14 mb-16">
-        <Switch>
-          <Route path="/" component={() => {
-            setActiveTab("home");
-            return <Home />;
-          }} />
-          <Route path="/shows" component={() => {
-            setActiveTab("shows");
-            return <Shows />;
-          }} />
-          <Route path="/groups" component={() => {
-            setActiveTab("groups");
-            return <Groups />;
-          }} />
-          <Route path="/profile" component={() => {
-            setActiveTab("profile");
-            return <Profile />;
-          }} />
-          <Route component={NotFound} />
-        </Switch>
+        {children}
       </main>
       
       {/* Bottom Navigation */}
@@ -82,13 +67,59 @@ function Router() {
       />
     </div>
   );
+
+  return (
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      
+      <ProtectedRoute path="/" component={() => {
+        setActiveTab("home");
+        return (
+          <AuthenticatedLayout>
+            <Home />
+          </AuthenticatedLayout>
+        );
+      }} />
+      
+      <ProtectedRoute path="/shows" component={() => {
+        setActiveTab("shows");
+        return (
+          <AuthenticatedLayout>
+            <Shows />
+          </AuthenticatedLayout>
+        );
+      }} />
+      
+      <ProtectedRoute path="/groups" component={() => {
+        setActiveTab("groups");
+        return (
+          <AuthenticatedLayout>
+            <Groups />
+          </AuthenticatedLayout>
+        );
+      }} />
+      
+      <ProtectedRoute path="/profile" component={() => {
+        setActiveTab("profile");
+        return (
+          <AuthenticatedLayout>
+            <Profile />
+          </AuthenticatedLayout>
+        );
+      }} />
+      
+      <Route component={NotFound} />
+    </Switch>
+  );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

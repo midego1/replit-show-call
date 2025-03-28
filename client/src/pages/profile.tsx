@@ -8,18 +8,30 @@ import {
   HelpCircleIcon, 
   MessageSquareIcon, 
   LogOutIcon, 
-  ChevronRightIcon 
+  ChevronRightIcon,
+  Loader2
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Profile() {
+  const { user, logoutMutation } = useAuth();
+  
+  // Get initials from username for the avatar
+  const getInitials = (username: string) => {
+    return username.substring(0, 2).toUpperCase();
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
       <div className="text-center mb-8">
         <div className="inline-block rounded-full bg-primary text-white w-20 h-20 flex items-center justify-center text-2xl font-medium mb-4">
-          JS
+          {user ? getInitials(user.username) : <Loader2 className="animate-spin" />}
         </div>
-        <h2 className="text-xl font-medium">John Smith</h2>
-        <p className="text-gray-500">john.smith@example.com</p>
+        <h2 className="text-xl font-medium">{user?.username || "Loading..."}</h2>
       </div>
 
       <Card className="mb-6 shadow-sm overflow-hidden">
@@ -104,10 +116,16 @@ export default function Profile() {
 
       <Button 
         variant="destructive" 
-        className="w-full bg-opacity-10 py-3 rounded-lg"
+        className="w-full py-3 rounded-lg"
+        onClick={handleLogout}
+        disabled={logoutMutation.isPending}
       >
-        <LogOutIcon className="mr-2 h-5 w-5" />
-        Sign Out
+        {logoutMutation.isPending ? (
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        ) : (
+          <LogOutIcon className="mr-2 h-5 w-5" />
+        )}
+        {logoutMutation.isPending ? "Signing Out..." : "Sign Out"}
       </Button>
     </div>
   );
