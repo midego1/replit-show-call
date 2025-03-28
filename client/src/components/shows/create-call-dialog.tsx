@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group } from "@shared/schema";
+import { XIcon, SaveIcon, BellIcon, UsersIcon } from "lucide-react";
 
 // Extend the insertCallSchema with client-side validation
 const createCallSchema = z.object({
@@ -209,18 +210,28 @@ export function CreateCallDialog({
               >
                 <Button 
                   type="button" 
-                  variant="ghost" 
+                  variant="outline" 
+                  size="sm"
                   disabled={createCall.isPending}
+                  className="h-8 text-xs"
                 >
+                  <XIcon className="h-3 w-3 mr-1" />
                   Cancel
                 </Button>
               </div>
               <div className="touch-manipulation">
                 <Button 
                   type="submit" 
+                  size="sm"
                   disabled={createCall.isPending || !showId}
+                  className="h-8 text-xs"
                 >
-                  {createCall.isPending ? "Adding..." : "Add Call"}
+                  {createCall.isPending ? "Adding..." : (
+                    <>
+                      <SaveIcon className="h-3 w-3 mr-1" />
+                      Save
+                    </>
+                  )}
                 </Button>
               </div>
             </DialogFooter>

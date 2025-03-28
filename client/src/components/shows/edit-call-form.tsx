@@ -224,45 +224,47 @@ export function EditCallForm({
                 )}
               />
               
-              {/* Action buttons */}
-              <div className="flex justify-end space-x-2 pt-3">
+              {/* Action buttons - matches show form styling */}
+              <div className="flex justify-between pt-2">
                 <Button 
                   type="button" 
                   variant="ghost" 
                   size="sm"
                   onClick={() => deleteCall.mutate()}
                   disabled={deleteCall.isPending || updateCall.isPending}
-                  className="h-8 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 text-xs"
                 >
-                  <Trash2Icon className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="hidden sm:inline">Delete</span>
+                  <Trash2Icon className="h-3 w-3 mr-1" />
+                  Delete
                 </Button>
                 
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={onCancel}
-                  disabled={updateCall.isPending || deleteCall.isPending}
-                  className="h-8 text-xs"
-                >
-                  <XIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="hidden sm:inline">Cancel</span>
-                </Button>
-                
-                <Button 
-                  type="submit" 
-                  size="sm"
-                  disabled={updateCall.isPending || deleteCall.isPending}
-                  className="h-8 text-xs"
-                >
-                  {updateCall.isPending ? "Saving..." : (
-                    <>
-                      <SaveIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span className="hidden sm:inline">Save</span>
-                    </>
-                  )}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={onCancel}
+                    disabled={updateCall.isPending || deleteCall.isPending}
+                    className="h-8 text-xs"
+                  >
+                    <XIcon className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                  
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    disabled={updateCall.isPending || deleteCall.isPending}
+                    className="h-8 text-xs"
+                  >
+                    {updateCall.isPending ? "Saving..." : (
+                      <>
+                        <SaveIcon className="h-3 w-3 mr-1" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>

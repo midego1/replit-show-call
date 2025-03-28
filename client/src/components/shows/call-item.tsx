@@ -47,16 +47,18 @@ export function CallItem({ call, number }: CallItemProps) {
         />
       ) : (
         <div 
-          className="flex flex-col sm:flex-row items-start sm:items-center py-3 px-3 cursor-pointer relative hover:bg-gray-50 transition-colors"
+          className="flex items-start py-3 px-3 cursor-pointer relative hover:bg-gray-50 transition-colors"
           onClick={toggleEdit}
         >
           <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-400 text-white font-medium mr-3">
             {number.toString().padStart(2, "0")}
           </div>
-          <div className="flex-grow mt-1 sm:mt-0">
-            <div className="flex flex-col">
-              <div className="flex flex-col sm:flex-row sm:items-center">
-                <span className="text-gray-900 font-medium mr-2">
+          
+          <div className="flex-grow">
+            <div className="flex justify-between items-start">
+              {/* Left side - Title and group tags */}
+              <div className="flex flex-col">
+                <span className="text-gray-900 font-medium">
                   {call.title || 'Untitled Call'}
                   {call.sendNotification === 1 && (
                     <span
@@ -68,7 +70,13 @@ export function CallItem({ call, number }: CallItemProps) {
                     </span>
                   )}
                 </span>
-                <div className="flex flex-wrap gap-1 mt-1 sm:mt-0">
+                
+                {/* Description directly underneath title */}
+                {call.description && (
+                  <span className="text-gray-500 text-xs mt-1">{call.description}</span>
+                )}
+                
+                <div className="flex flex-wrap gap-1 mt-2">
                   {call.groupNames && call.groupNames.map((groupName, idx) => (
                     <span 
                       key={idx} 
@@ -80,35 +88,33 @@ export function CallItem({ call, number }: CallItemProps) {
                   ))}
                 </div>
               </div>
-              {call.description && (
-                <span className="text-gray-500 text-xs sm:text-sm mt-1">{call.description}</span>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center ml-2 mt-2 sm:mt-0 sm:ml-0">
-            <div className="text-right whitespace-nowrap">
-              {call.timerString ? (
-                call.timerString === "00:00" ? (
-                  <span className="text-xs sm:text-sm font-semibold bg-red-100 text-red-500 px-2 py-1 rounded-md">
-                    Now
-                  </span>
-                ) : call.minutesBefore <= 15 ? (
-                  <span className="text-xs sm:text-sm font-semibold bg-orange-100 text-orange-500 px-2 py-1 rounded-md">
-                    {call.timerString.replace(":", "h ")}m
-                    <span className="hidden sm:inline"> until call</span>
-                  </span>
-                ) : (
-                  <span className="text-xs sm:text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-md">
-                    {call.timerString.replace(":", "h ")}m
-                    <span className="hidden sm:inline"> until call</span>
-                  </span>
-                )
-              ) : (
-                <span className="text-xs sm:text-sm font-semibold bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
-                  Time not set
-                </span>
-              )}
+              
+              {/* Right side - Timer */}
+              <div className="flex-shrink-0 ml-3">
+                <div className="text-right whitespace-nowrap">
+                  {call.timerString ? (
+                    call.timerString === "00:00" ? (
+                      <span className="text-xs sm:text-sm font-semibold bg-red-100 text-red-500 px-2 py-1 rounded-md">
+                        Now
+                      </span>
+                    ) : call.minutesBefore <= 15 ? (
+                      <span className="text-xs sm:text-sm font-semibold bg-orange-100 text-orange-500 px-2 py-1 rounded-md">
+                        {call.timerString.replace(":", "h ")}m
+                        <span className="hidden sm:inline"> until call</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs sm:text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-md">
+                        {call.timerString.replace(":", "h ")}m
+                        <span className="hidden sm:inline"> until call</span>
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-xs sm:text-sm font-semibold bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
+                      Time not set
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

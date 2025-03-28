@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { XIcon, SaveIcon } from "lucide-react";
 
 // Extend the insertShowSchema with client-side fields for the form
 const createShowSchema = z.object({
@@ -142,18 +143,28 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
               >
                 <Button 
                   type="button" 
-                  variant="ghost" 
+                  variant="outline" 
+                  size="sm"
                   disabled={createShow.isPending}
+                  className="h-8 text-xs"
                 >
+                  <XIcon className="h-3 w-3 mr-1" />
                   Cancel
                 </Button>
               </div>
               <div className="touch-manipulation">
                 <Button 
                   type="submit" 
+                  size="sm"
                   disabled={createShow.isPending}
+                  className="h-8 text-xs"
                 >
-                  {createShow.isPending ? "Creating..." : "Create Show"}
+                  {createShow.isPending ? "Creating..." : (
+                    <>
+                      <SaveIcon className="h-3 w-3 mr-1" />
+                      Create Show
+                    </>
+                  )}
                 </Button>
               </div>
             </DialogFooter>

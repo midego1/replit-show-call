@@ -195,26 +195,28 @@ export function InlineCallForm({
             )}
           />
           
-          <div className="flex justify-end space-x-2 mt-4">
+          <div className="flex justify-end space-x-2 pt-2">
             <Button 
               type="button" 
               variant="outline" 
               size="sm"
               onClick={onCancel}
               disabled={createCall.isPending}
+              className="h-8 text-xs"
             >
-              <XIcon className="h-4 w-4 mr-1" />
+              <XIcon className="h-3 w-3 mr-1" />
               Cancel
             </Button>
             <Button 
               type="submit" 
               size="sm"
               disabled={createCall.isPending}
+              className="h-8 text-xs"
             >
               {createCall.isPending ? "Saving..." : (
                 <>
-                  <SaveIcon className="h-4 w-4 mr-1" />
-                  Save Call
+                  <SaveIcon className="h-3 w-3 mr-1" />
+                  Save
                 </>
               )}
             </Button>
