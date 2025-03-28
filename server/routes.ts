@@ -63,6 +63,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+  
+  // Add PATCH endpoint for partial updates (same implementation as PUT but follows RESTful conventions)
+  app.patch("/api/shows/:id", async (req, res) => {
+    try {
+      const showId = parseInt(req.params.id);
+      
+      // Process date string if needed
+      let updateData = { ...req.body };
+      if (typeof updateData.startTime === 'string') {
+        updateData.startTime = new Date(updateData.startTime);
+      }
+      
+      const showData = insertShowSchema.omit({ userId: true }).partial().parse(updateData);
+      const show = await storage.updateShow(showId, showData);
+      if (!show) {
+        return res.status(404).json({ message: "Show not found" });
+      }
+      res.json(show);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.delete("/api/shows/:id", async (req, res) => {
     const showId = parseInt(req.params.id);

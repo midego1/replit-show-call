@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit2Icon, Trash2Icon, CalendarIcon, ClockIcon, UsersIcon } from "lucide-react";
 import { CreateShowDialog } from "@/components/shows/create-show-dialog";
+import { EditShowDialog } from "@/components/shows/edit-show-dialog";
 import { FloatingActionButton } from "@/components/floating-action-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,12 +15,20 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Shows() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedShow, setSelectedShow] = useState<Show | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   // Fetch shows
   const { data: shows = [] } = useQuery<Show[]>({
     queryKey: ['/api/shows'],
+  });
+  
+  // Fetch all calls for call count
+  const { data: allCalls = [] } = useQuery<any[]>({
+    queryKey: ['/api/calls'],
+    enabled: shows.length > 0,
   });
   
   // Process shows
@@ -41,6 +50,7 @@ export default function Shows() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/shows'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/calls'] });
       toast({
         title: "Show deleted",
         description: "The show has been successfully deleted."
@@ -59,6 +69,16 @@ export default function Shows() {
     if (confirm(`Are you sure you want to delete "${showName}"? This cannot be undone.`)) {
       deleteShow.mutate(showId);
     }
+  };
+  
+  const handleEditShow = (show: Show) => {
+    setSelectedShow(show);
+    setShowEditDialog(true);
+  };
+  
+  // Count calls for a specific show
+  const getCallCount = (showId: number) => {
+    return allCalls.filter(call => call.showId === showId).length;
   };
   
   return (
@@ -84,7 +104,12 @@ export default function Shows() {
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-lg font-medium">{show.name}</h3>
                   <div className="flex space-x-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-primary">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-gray-500 hover:text-primary"
+                      onClick={() => handleEditShow(show)}
+                    >
                       <Edit2Icon className="h-4 w-4" />
                     </Button>
                     <Button 
@@ -110,7 +135,7 @@ export default function Shows() {
                   </div>
                   <div className="flex items-center">
                     <UsersIcon className="h-4 w-4 mr-1" />
-                    <span>0 calls</span>
+                    <span>{getCallCount(show.id)} calls</span>
                   </div>
                 </div>
               </CardContent>
@@ -124,6 +149,12 @@ export default function Shows() {
       <CreateShowDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+      />
+      
+      <EditShowDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        show={selectedShow}
       />
     </div>
   );
