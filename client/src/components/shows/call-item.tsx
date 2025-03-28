@@ -79,23 +79,23 @@ export function CallItem({ call, number }: CallItemProps) {
               <div className="flex-shrink-0 ml-3">
                 <div className="text-right whitespace-nowrap">
                   {call.timerString ? (
-                    call.timerString === "00:00" ? (
-                      <span className="text-xs sm:text-sm font-semibold bg-red-100 text-red-500 px-2 py-1 rounded-md">
+                    call.timerString === "0:00" ? (
+                      <span className="text-xs sm:text-sm font-semibold bg-red-100 text-red-500 px-2 py-1 rounded-full">
                         Now
                       </span>
                     ) : call.minutesBefore <= 15 ? (
-                      <span className="text-xs sm:text-sm font-semibold bg-orange-100 text-orange-500 px-2 py-1 rounded-md">
+                      <span className="text-xs sm:text-sm font-semibold bg-orange-100 text-orange-500 px-2 py-1 rounded-full">
                         {call.timerString.replace(":", "h ")}m
                         <span className="hidden sm:inline"> until call</span>
                       </span>
                     ) : (
-                      <span className="text-xs sm:text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-md">
+                      <span className="text-xs sm:text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full">
                         {call.timerString.replace(":", "h ")}m
                         <span className="hidden sm:inline"> until call</span>
                       </span>
                     )
                   ) : (
-                    <span className="text-xs sm:text-sm font-semibold bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
+                    <span className="text-xs sm:text-sm font-semibold bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
                       Time not set
                     </span>
                   )}

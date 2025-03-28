@@ -35,7 +35,7 @@ export function ShowCountdown({ show, className = "" }: ShowCountdownProps) {
   
   return (
     <div className={`flex items-center ${className}`}>
-      <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-md">
+      <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-full">
         {timeRemaining} until show
       </span>
     </div>
