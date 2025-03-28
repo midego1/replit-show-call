@@ -26,7 +26,7 @@ export function formatTimerString(milliseconds: number): string {
   const hours = Math.floor(milliseconds / (1000 * 60 * 60));
   const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
   
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  return `${hours}:${minutes.toString().padStart(2, "0")}`;
 }
 
 export function calculateCallTime(showStartTime: Date, minutesBefore: number): Date {

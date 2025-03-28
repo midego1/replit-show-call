@@ -108,18 +108,22 @@ export function CallItem({ call, number }: CallItemProps) {
             <div className="text-right whitespace-nowrap">
               {call.timerString ? (
                 call.timerString === "00:00" ? (
-                  <span className="text-sm font-medium text-red-500">Now</span>
+                  <span className="text-sm font-semibold bg-red-100 text-red-500 px-2 py-1 rounded-md">
+                    Now
+                  </span>
                 ) : call.minutesBefore <= 15 ? (
-                  <span className="text-sm font-medium text-orange-500">
-                    {call.timerString} <span className="text-xs font-normal">hours until call</span>
+                  <span className="text-sm font-semibold bg-orange-100 text-orange-500 px-2 py-1 rounded-md">
+                    {call.timerString.replace(":", "h ")}m until call
                   </span>
                 ) : (
-                  <span className="text-sm font-medium text-primary">
-                    {call.timerString} <span className="text-xs font-normal">hours until call</span>
+                  <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-1 rounded-md">
+                    {call.timerString.replace(":", "h ")}m until call
                   </span>
                 )
               ) : (
-                <span className="text-sm font-medium text-gray-500">Time not set</span>
+                <span className="text-sm font-semibold bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
+                  Time not set
+                </span>
               )}
             </div>
           </div>
