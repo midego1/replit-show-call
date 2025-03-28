@@ -50,7 +50,7 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
       const data = {
         name: values.name,
         description: values.description || "",
-        startTime,
+        startTime: startTime.toISOString(), // Convert to ISO string format
         userId: 1 // Default user ID
       };
       
@@ -161,7 +161,7 @@ export function CreateShowDialog({ open, onOpenChange }: CreateShowDialogProps) 
                     size="sm"
                     className={`rounded-full flex items-center ${
                       selectedGroups.includes(group) 
-                        ? "bg-primary bg-opacity-10 text-primary border-primary" 
+                        ? "bg-blue-100 text-blue-800 border-blue-300" 
                         : ""
                     }`}
                     onClick={() => toggleGroup(group)}

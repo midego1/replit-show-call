@@ -19,7 +19,7 @@ export function CallItem({ call, number }: CallItemProps) {
         <div className="flex items-center">
           <span className="text-gray-900 font-medium">{call.description}</span>
           {call.groupName && (
-            <span className="ml-2 text-xs bg-primary bg-opacity-20 text-primary px-2 py-0.5 rounded">
+            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
               {call.groupName}
             </span>
           )}
