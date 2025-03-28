@@ -11,15 +11,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Group, Call } from "@shared/schema";
-import { SaveIcon, XIcon, Trash2Icon, BellRingIcon } from "lucide-react";
+import { SaveIcon, XIcon, Trash2Icon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendNotification, requestNotificationPermission } from "@/lib/utils";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
 
 // Extend the insertCallSchema with client-side validation
 const editCallSchema = z.object({
@@ -301,30 +295,30 @@ export function EditCallForm({
                     Delete
                   </Button>
                   
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleSendNotification}
-                          disabled={isSendingNotification || form.getValues("groupIds").length === 0}
-                          className="h-8 text-xs"
-                        >
-                          {isSendingNotification ? (
-                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent mr-1" />
-                          ) : (
-                            <BellRingIcon className="h-3 w-3 mr-1" />
-                          )}
-                          Notify Groups
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Send notification to selected groups</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="send-notification-now"
+                      disabled={isSendingNotification || form.getValues("groupIds").length === 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          handleSendNotification();
+                          // Reset the checkbox after sending
+                          setTimeout(() => {
+                            const checkbox = document.getElementById("send-notification-now") as HTMLInputElement;
+                            if (checkbox) checkbox.checked = false;
+                          }, 500);
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label 
+                      htmlFor="send-notification-now" 
+                      className="text-xs font-medium text-gray-700 cursor-pointer"
+                    >
+                      {isSendingNotification ? "Sending..." : "Send notification now"}
+                    </label>
+                  </div>
                 </div>
                 
                 <div className="flex space-x-2">

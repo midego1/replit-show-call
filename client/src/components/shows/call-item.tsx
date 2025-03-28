@@ -1,17 +1,13 @@
 import { useState } from "react";
 import { CallItemProps } from "@/lib/types";
-import { sendNotification, requestNotificationPermission } from "@/lib/utils";
 import { EditCallForm } from "@/components/shows/edit-call-form";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Edit2Icon, BellIcon, BellRingIcon, MoreVerticalIcon, XCircleIcon } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 export function CallItem({ call, number }: CallItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isSendingNotification, setIsSendingNotification] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -24,64 +20,10 @@ export function CallItem({ call, number }: CallItemProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/calls"] });
     },
   });
-  
-  const handleSendNotification = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening the edit form
-    setIsSendingNotification(true);
-    
-    try {
-      // Request permission first
-      const isPermissionGranted = await requestNotificationPermission();
-      
-      if (!isPermissionGranted) {
-        toast({
-          title: "Permission denied",
-          description: "You need to grant notification permission to send notifications.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Format groups for the notification
-      const groupText = call.groupNames && call.groupNames.length > 0 
-        ? `${call.groupNames.join(', ')} Call`
-        : 'Call';
-        
-      // Send the notification
-      sendNotification(`${groupText}: ${call.title || 'Call Time'}`, {
-        body: call.description 
-          ? call.description 
-          : `Time for ${groupText}! Please prepare for the show.`,
-        icon: "/favicon.ico"
-      });
-      
-      // Show success toast
-      toast({
-        title: "Notification sent",
-        description: `Notification sent to ${call.groupNames?.join(', ') || 'all groups'}.`,
-        variant: "default"
-      });
-    } catch (error) {
-      toast({
-        title: "Error sending notification",
-        description: "There was a problem sending the notification.",
-        variant: "destructive"
-      });
-      console.error("Notification error:", error);
-    } finally {
-      setIsSendingNotification(false);
-    }
-  };
+  // This functionality has been removed and replaced with a checkbox in the edit form
   
   const toggleEdit = () => {
     setIsEditing(!isEditing);
-  };
-  
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete "${call.title || 'Untitled Call'}"?`)) {
-      deleteMutation.mutate();
-    }
   };
   
   const handleEditComplete = () => {
@@ -145,31 +87,6 @@ export function CallItem({ call, number }: CallItemProps) {
           </div>
           
           <div className="flex items-center">
-            <div className="mr-3">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-500 hover:text-primary opacity-70 hover:opacity-100 transition-opacity"
-                      onClick={handleSendNotification}
-                      disabled={isSendingNotification}
-                    >
-                      {isSendingNotification ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      ) : (
-                        <BellRingIcon className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Send notification to selected groups</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            
             <div className="text-right whitespace-nowrap">
               {call.timerString ? (
                 call.timerString === "00:00" ? (
