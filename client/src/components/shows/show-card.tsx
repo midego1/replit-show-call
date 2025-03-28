@@ -8,11 +8,10 @@ import {
   ChevronUpIcon,
   ClockIcon,
   CalendarIcon,
-  SettingsIcon,
   PlusCircleIcon,
   XIcon
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -136,15 +135,6 @@ export function ShowCard({
               </div>
             )}
           </CardContent>
-          
-          {/* Preferences */}
-          <CardFooter className="px-3 py-3 flex justify-between items-center border-t border-gray-200 mt-1 bg-gray-50">
-            <div className="flex items-center text-gray-500">
-              <SettingsIcon className="w-5 h-5 mr-2" />
-              <span>Preferences</span>
-            </div>
-            <ChevronDownIcon className="w-5 h-5 text-gray-500" />
-          </CardFooter>
         </>
       )}
     </Card>
