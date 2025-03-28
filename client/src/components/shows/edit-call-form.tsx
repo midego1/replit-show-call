@@ -44,19 +44,14 @@ export function EditCallForm({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Get both default groups and show-specific groups
-  const { data: defaultGroups = [] } = useQuery<Group[]>({
-    queryKey: ["/api/groups"],
-    enabled: !!call.showId
-  });
-  
+  // Only show show-specific groups
   const { data: showGroups = [] } = useQuery<Group[]>({
     queryKey: call.showId ? ["/api/shows", call.showId, "groups"] : [],
     enabled: !!call.showId
   });
   
-  // Combine both lists to show all available groups for this show
-  const groups = [...defaultGroups, ...showGroups];
+  // Only use show-specific groups
+  const groups = [...showGroups];
   
   // Parse groupIds from string if needed
   const initialGroupIds = typeof call.groupIds === 'string'
@@ -191,19 +186,25 @@ export function EditCallForm({
                   <FormItem>
                     <FormLabel className="text-xs font-medium">Groups</FormLabel>
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {groups.map(group => {
-                        const isSelected = field.value?.includes(group.id);
-                        return (
-                          <Badge
-                            key={group.id}
-                            variant={isSelected ? "default" : "outline"}
-                            className={`cursor-pointer text-xs px-2 py-0.5 ${isSelected ? "bg-primary" : ""}`}
-                            onClick={() => toggleGroup(group.id)}
-                          >
-                            {group.name}
-                          </Badge>
-                        );
-                      })}
+                      {groups.length > 0 ? (
+                        groups.map(group => {
+                          const isSelected = field.value?.includes(group.id);
+                          return (
+                            <Badge
+                              key={group.id}
+                              variant={isSelected ? "default" : "outline"}
+                              className={`cursor-pointer text-xs px-2 py-0.5 ${isSelected ? "bg-primary" : ""}`}
+                              onClick={() => toggleGroup(group.id)}
+                            >
+                              {group.name}
+                            </Badge>
+                          );
+                        })
+                      ) : (
+                        <div className="text-sm text-gray-500 py-1">
+                          No groups available. Please add show-specific groups in the Groups tab first.
+                        </div>
+                      )}
                     </div>
                     <FormMessage className="text-xs" />
                   </FormItem>

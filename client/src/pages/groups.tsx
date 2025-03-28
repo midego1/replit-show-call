@@ -210,11 +210,21 @@ export default function Groups() {
   
   return (
     <div className="px-4 py-4 container mx-auto max-w-4xl">
-      <h2 className="text-xl font-medium mb-6">Groups</h2>
+      <h2 className="text-xl font-medium mb-4">Groups</h2>
+      
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6 text-sm text-blue-800">
+        <p className="font-medium mb-1">About Groups in Show Caller</p>
+        <p>Groups in Show Caller are now show-specific. This means:</p>
+        <ul className="list-disc ml-5 mt-2 space-y-1">
+          <li>Create groups directly for a specific show</li>
+          <li>Each show maintains its own separate set of groups</li>
+          <li>When creating calls, only groups assigned to that show will be available</li>
+        </ul>
+      </div>
       
       <Card className="mb-6 shadow-sm overflow-hidden">
         <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-medium">Default Groups</h3>
+          <h3 className="font-medium">Group Templates</h3>
         </CardHeader>
         <CardContent className="p-0">
           <ul className="divide-y divide-gray-200">
@@ -239,7 +249,7 @@ export default function Groups() {
       
       <Card className="mb-6 shadow-sm overflow-hidden">
         <CardHeader className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="font-medium">Custom Groups</h3>
+          <h3 className="font-medium">Global Custom Groups</h3>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -368,8 +378,8 @@ export default function Groups() {
             <DialogTitle>Create New Group</DialogTitle>
             <DialogDescription>
               {selectedShowId 
-                ? `Add a custom group to ${shows.find(s => s.id === selectedShowId)?.name}`
-                : "Create a new custom group that can be used across shows"
+                ? `Add a custom group to "${shows.find(s => s.id === selectedShowId)?.name}"`
+                : "Create a global group template (can be added to specific shows later)"
               }
             </DialogDescription>
           </DialogHeader>

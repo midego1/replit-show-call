@@ -41,19 +41,14 @@ export function InlineCallForm({
 }: InlineCallFormProps) {
   const queryClient = useQueryClient();
   
-  // Get both default groups and show-specific groups
-  const { data: defaultGroups = [] } = useQuery<Group[]>({
-    queryKey: ["/api/groups"],
-    enabled: !!showId
-  });
-  
+  // Only show show-specific groups
   const { data: showGroups = [] } = useQuery<Group[]>({
     queryKey: showId ? ["/api/shows", showId, "groups"] : [],
     enabled: !!showId
   });
   
-  // Combine both lists to show all available groups for this show
-  const groups = [...defaultGroups, ...showGroups];
+  // Only use show-specific groups
+  const groups = [...showGroups];
   
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),
@@ -150,27 +145,33 @@ export function InlineCallForm({
                 </FormLabel>
                 <FormControl>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {groups.map((group) => {
-                      const isSelected = field.value.includes(group.id);
-                      return (
-                        <Badge 
-                          key={group.id}
-                          variant={isSelected ? "default" : "outline"}
-                          className={`cursor-pointer ${isSelected ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
-                          onClick={() => {
-                            if (isSelected) {
-                              // Remove group if already selected
-                              field.onChange(field.value.filter(id => id !== group.id));
-                            } else {
-                              // Add group if not selected
-                              field.onChange([...field.value, group.id]);
-                            }
-                          }}
-                        >
-                          {group.name}
-                        </Badge>
-                      );
-                    })}
+                    {groups.length > 0 ? (
+                      groups.map((group) => {
+                        const isSelected = field.value.includes(group.id);
+                        return (
+                          <Badge 
+                            key={group.id}
+                            variant={isSelected ? "default" : "outline"}
+                            className={`cursor-pointer ${isSelected ? 'bg-primary text-white' : 'hover:bg-primary/10'}`}
+                            onClick={() => {
+                              if (isSelected) {
+                                // Remove group if already selected
+                                field.onChange(field.value.filter(id => id !== group.id));
+                              } else {
+                                // Add group if not selected
+                                field.onChange([...field.value, group.id]);
+                              }
+                            }}
+                          >
+                            {group.name}
+                          </Badge>
+                        );
+                      })
+                    ) : (
+                      <div className="text-sm text-gray-500 py-1">
+                        No groups available. Please add show-specific groups in the Groups tab first.
+                      </div>
+                    )}
                   </div>
                 </FormControl>
                 <FormMessage />

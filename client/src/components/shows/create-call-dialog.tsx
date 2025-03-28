@@ -43,19 +43,14 @@ export function CreateCallDialog({
   const queryClient = useQueryClient();
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
   
-  // Get both default groups and show-specific groups
-  const { data: defaultGroups = [] } = useQuery<Group[]>({
-    queryKey: ["/api/groups"],
-    enabled: open && showId !== null
-  });
-  
+  // Only show show-specific groups
   const { data: showGroups = [] } = useQuery<Group[]>({
     queryKey: showId ? ["/api/shows", showId, "groups"] : [],
     enabled: open && showId !== null
   });
   
-  // Combine both lists to show all available groups for this show
-  const groups = [...defaultGroups, ...showGroups];
+  // Only use show-specific groups
+  const groups = [...showGroups];
   
   const form = useForm<CreateCallFormValues>({
     resolver: zodResolver(createCallSchema),
@@ -173,16 +168,22 @@ export function CreateCallDialog({
                 <FormItem>
                   <FormLabel>Assign to Groups</FormLabel>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {groups.map((group) => (
-                      <Badge 
-                        key={group.id}
-                        variant={selectedGroups.includes(group.id) ? "default" : "outline"} 
-                        className="cursor-pointer p-2"
-                        onClick={() => toggleGroup(group.id)}
-                      >
-                        {group.name}
-                      </Badge>
-                    ))}
+                    {groups.length > 0 ? (
+                      groups.map((group) => (
+                        <Badge 
+                          key={group.id}
+                          variant={selectedGroups.includes(group.id) ? "default" : "outline"} 
+                          className="cursor-pointer p-2"
+                          onClick={() => toggleGroup(group.id)}
+                        >
+                          {group.name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <div className="text-sm text-gray-500 py-1">
+                        No groups available. Please add show-specific groups in the Groups tab first.
+                      </div>
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
